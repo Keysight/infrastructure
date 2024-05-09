@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints
+src/tests/*.html
+src/tests/*.yml
+.yml
+build
+dist
+.pytest_cache
+*.egg-info
+src/generated
+src/tests/generated_artifacts

@@ -1,0 +1,68 @@
+name: Models build, test and optionally create release
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Output
+        env:
+          PRN: ${{github.event_path.pull_request.number}}
+          GITHUB_CONTEXT: ${{ toJSON(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Sets up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+
+      - name: Compile protos and run tests
+        run: |
+          make env
+          make test
+
+      - uses: dorny/paths-filter@v2
+        id: change
+        with:
+          filters: |
+            version:
+              - 'VERSION'
+
+      - name: Read VERSION file
+        if: github.event_name == 'push' && github.ref_name == 'main' && steps.change.outputs.version == 'true'
+        id: getversion
+        run: |
+          echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
+          echo "3.10"
+
+      - name: Create release
+        if: github.event_name == 'push' && github.ref_name == 'main' && steps.change.outputs.version == 'true'
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          draft: false
+          prerelease: false
+          release_name: v${{steps.getversion.outputs.version}}+${{github.ref_name}}
+          tag_name: v${{steps.getversion.outputs.version}}+${{github.ref_name}}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Upload release artifact
+        if: github.event_name == 'push' && github.ref_name == 'main' && steps.change.outputs.version == 'true'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/mlcommons_chakra-${{steps.getversion.outputs.version}}+${{github.ref_name}}-py3-none-any.whl
+          asset_name: mlcommons_chakra-${{steps.getversion.outputs.version}}+${{github.ref_name}}-py3-none-any.whl
+          asset_content_type: application/gzip

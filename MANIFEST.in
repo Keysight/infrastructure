@@ -1,0 +1,3 @@
+include ./VERSION
+include ./src/generated/*.proto
+include ./src/generated/*.pyi

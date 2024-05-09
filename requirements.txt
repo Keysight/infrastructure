@@ -1,0 +1,7 @@
+pytest
+pyyaml
+protobuf
+grpcio
+grpcio-tools
+wheel
+scikit-learn

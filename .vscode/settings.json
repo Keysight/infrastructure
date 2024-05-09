@@ -1,0 +1,27 @@
+{
+    "editor.formatOnSave": true,
+    "editor.rulers": [ 80 ],
+    "json.format.enable": true,
+    "yaml.format.enable": true,
+    "json.format.keepLines": true,
+    "python.analysis.typeCheckingMode": "off",
+    "[yaml]": {
+        "editor.tabSize": 2,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[proto]": {
+        "editor.wordWrap": "off",
+        "editor.tabSize": 2,
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "[proto3]": {
+        "editor.defaultFormatter": "xaver.clang-format"
+    },
+    "protoc": {
+        "options": [
+            "--proto_path=${workspaceFolder}/protos"
+        ]
+    },
+    "clang-format.language.proto.enable": true,
+    "clang-format.language.proto.style": "{ IndentWidth: 2, BasedOnStyle: google, ReflowComments: false, ColumnLimit: 0, AlignTrailingComments: true }",
+}
