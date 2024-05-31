@@ -1,10 +1,8 @@
 import pytest
-import os
-from mlcommons_chakra.builders import HostBuilder
-from mlcommons_chakra.generic import GenericHost
-from mlcommons_chakra.closfabric import ClosFabric
-from mlcommons_chakra.zionex import ZionEx
-from mlcommons_chakra.infrastructure import Infrastructure
+from keysight_chakra.generic import GenericHost
+from keysight_chakra.closfabric import ClosFabric
+from keysight_chakra.zionex import ZionEx
+from keysight_chakra.infrastructure import Infrastructure
 
 
 def test_generic_host():

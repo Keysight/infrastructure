@@ -15,7 +15,7 @@ build: ## compile all .proto files and generate artifacts
 		--proto_path=./protos \
 		--python_out=$(GENERATED_DIR) --pyi_out=$(GENERATED_DIR) \
 		et_def.proto infra.proto
-	python3 -m pip uninstall -y mlcommons-chakra
+	python3 -m pip uninstall -y keysight-chakra
 	python3 setup.py bdist_wheel
 	python3 -m pip install --no-cache .
 

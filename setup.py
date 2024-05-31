@@ -6,7 +6,7 @@
 import setuptools
 import subprocess
 
-package_base = "mlcommons_chakra"
+package_base = "keysight_chakra"
 
 branch = subprocess.check_output(["git", "branch", "--show-current"]).strip().decode()
 with open("./VERSION", "rt") as fp:
@@ -30,7 +30,7 @@ setuptools.setup(
     version=version,
     python_requires=">=3.8",
     author="Keysight",
-    author_email=f"ai-platform@keysight.com",
+    author_email=f"support.ix@keysight.com",
     url="https://keysight.com",
     packages=set(package_dir_map.keys()),
     package_dir=package_dir_map,
