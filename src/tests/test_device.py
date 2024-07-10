@@ -15,26 +15,25 @@ def test_generic_host_no_params():
     host = GenericHost()
     assert host.get_component("npu") is not None
     assert host.get_component("nic") is not None
+    assert "nvlink" not in host._device.links
 
 def test_generic_host_with_params():
-    host = GenericHost(npu_count=4, nvlink_bandwidth_gbps=600)
+    npu_count = 4
+    host = GenericHost(npu_count=npu_count, nvlink_bandwidth_gbps=600)
     assert "nvlink" in host._device.links
     assert host._device.links["nvlink"].type == infra.LINK_NVLINK
-    seen_pair_map = {
-        "0_1": False,
-        "0_2": False,
-        "0_3": False,
-        "1_2": False,
-        "1_3": False,
-        "2_3": False,
-    }
+
+    seen_map = {}
+    for npu_index in range(npu_count):
+        seen_map[npu_index] = False
+
     for connection in host._device.connections:
-        if connection.link.c1 == "npu" and connection.link.c2 == "npu":
-            pair_key = f"{connection.link.c1_index}_{connection.link.c2_index}"
-            assert pair_key in seen_pair_map
-            assert not seen_pair_map[pair_key]
-            seen_pair_map[pair_key] = True
-    for v in seen_pair_map.values():
+        if connection.link.c1 == "npu" and connection.link.c2 == "nvswitch":
+            npu_index = connection.link.c1_index
+            assert npu_index in seen_map
+            assert not seen_map[npu_index]
+            seen_map[npu_index] = True
+    for v in seen_map.values():
         assert v == True
 
 @pytest.mark.parametrize(

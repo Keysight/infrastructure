@@ -23,7 +23,9 @@ class GenericHost(bld.HostBuilder):
         nvlink_bandwidth_gbps: int=0
     ):
         """Creates a generic device with only npu and nic components that are
-        connected by a pcie link. Optionally, npu components can also be connected by nvlink in a mesh topology.
+        connected by a pcie link. 
+
+        Optionally, npu components can be connected over nvlink using an nvswitch.
 
         name: The name of the generic device
         npu_count: The number of npu/nic components in the device.
@@ -49,8 +51,17 @@ class GenericHost(bld.HostBuilder):
             type=infra.LinkType.LINK_NVLINK,
             bandwidth=infra.Bandwidth(gbps=nvlink_bandwidth_gbps),
         )
+        nvswitch = infra.Component(
+            name="nvswitch",
+            count=1,
+            switch=infra.Switch(nvlink=infra.NvLink()),
+        )
 
         links = { pcie.name: pcie }
+        components = {
+            npu.name: npu,
+            self._port_component.name: self._port_component,
+        }
         connections = []
         # Add npu->nic pcie connections
         for npu_idx in range(npu_count):
@@ -68,27 +79,24 @@ class GenericHost(bld.HostBuilder):
 
         # Add nvlink connections if bandwidth was provided
         if nvlink_bandwidth_gbps > 0:
+            components[nvswitch.name] = nvswitch
             links[nvlink.name] = nvlink
             for npu_idx_a in range(npu_count):
-                for npu_idx_b in range(npu_idx_a+1, npu_count):
-                    connections.append(
-                        infra.ComponentConnection(
-                            link=infra.ComponentLink(
-                                c1=npu.name,
-                                c1_index=npu_idx_a,
-                                link=nvlink.name,
-                                c2=npu.name,
-                                c2_index=npu_idx_b,
-                            )
+                connections.append(
+                    infra.ComponentConnection(
+                        link=infra.ComponentLink(
+                            c1=npu.name,
+                            c1_index=npu_idx_a,
+                            link=nvlink.name,
+                            c2=nvswitch.name,
+                            c2_index=0,
                         )
                     )
+                )
 
         self._device = infra.Device(
             name=self.name,
-            components={
-                npu.name: npu,
-                self._port_component.name: self._port_component,
-            },
+            components=components,
             links=links,
             connections=connections,
         )
