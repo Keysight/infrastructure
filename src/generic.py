@@ -25,11 +25,11 @@ class GenericHost(bld.HostBuilder):
         """Creates a generic device with only npu and nic components that are
         connected by a pcie link. 
 
-        Optionally, npu components can be connected over nvlink using an nvswitch.
+        Optionally, npu components can be connected via nvlink using a single nvswitch.
 
         name: The name of the generic device
         npu_count: The number of npu/nic components in the device.
-        nvlink_bandwidth_gbps: nvlink bandwidth in gigabits per second.
+        nvlink_bandwidth_gbps: nvlink bandwidth in gigabits per second. If 0, no nvlink connections will be added to the device.
         """
         super(GenericHost).__init__()
         npu = infra.Component(
