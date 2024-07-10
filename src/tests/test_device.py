@@ -1,15 +1,40 @@
 import pytest
+
 from keysight_chakra.generic import GenericHost
 from keysight_chakra.closfabric import ClosFabric
 from keysight_chakra.zionex import ZionEx
 from keysight_chakra.infrastructure import Infrastructure
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.realpath(__file__))+"/../")
+import generated.infra_pb2 as infra
 
-def test_generic_host():
+
+def test_generic_host_no_params():
     host = GenericHost()
     assert host.get_component("npu") is not None
     assert host.get_component("nic") is not None
+    assert "nvlink" not in host._device.links
 
+def test_generic_host_with_params():
+    npu_count = 4
+    host = GenericHost(npu_count=npu_count, nvlink_bandwidth_gbps=600)
+    assert "nvlink" in host._device.links
+    assert host._device.links["nvlink"].type == infra.LINK_NVLINK
+
+    seen_map = {}
+    for npu_index in range(npu_count):
+        seen_map[npu_index] = False
+
+    for connection in host._device.connections:
+        if connection.link.c1 == "npu" and connection.link.c2 == "nvswitch":
+            npu_index = connection.link.c1_index
+            assert npu_index in seen_map
+            assert not seen_map[npu_index]
+            seen_map[npu_index] = True
+    for v in seen_map.values():
+        assert v == True
 
 @pytest.mark.parametrize(
     "host_devices, rack_capacity, pod_capacity, spine_capacity",

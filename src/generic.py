@@ -1,6 +1,6 @@
 """Generic host device
 """
-from typing import List, Literal, Type
+from typing import List, Literal, Type, Tuple
 
 if __package__ is None or __package__ == "":
     import generated.infra_pb2 as infra
@@ -17,12 +17,19 @@ class GenericHost(bld.HostBuilder):
     name : str  = "Generic host"
     description : str = "Generic host device consisting of an NPU and NIC component"
 
-    def __init__(self, npu_count=1):
+    def __init__(
+        self,
+        npu_count=1,
+        nvlink_bandwidth_gbps: int=0
+    ):
         """Creates a generic device with only npu and nic components that are
-        connection by a pcie link.
+        connected by a pcie link. 
+
+        Optionally, npu components can be connected via nvlink using a single nvswitch.
 
         name: The name of the generic device
         npu_count: The number of npu/nic components in the device.
+        nvlink_bandwidth_gbps: nvlink bandwidth in gigabits per second. If 0, no nvlink connections will be added to the device.
         """
         super(GenericHost).__init__()
         npu = infra.Component(
@@ -39,7 +46,24 @@ class GenericHost(bld.HostBuilder):
             name="pcie",
             type=infra.LinkType.LINK_PCIE,
         )
+        nvlink = infra.Link(
+            name="nvlink",
+            type=infra.LinkType.LINK_NVLINK,
+            bandwidth=infra.Bandwidth(gbps=nvlink_bandwidth_gbps),
+        )
+        nvswitch = infra.Component(
+            name="nvswitch",
+            count=1,
+            switch=infra.Switch(nvlink=infra.NvLink()),
+        )
+
+        links = { pcie.name: pcie }
+        components = {
+            npu.name: npu,
+            self._port_component.name: self._port_component,
+        }
         connections = []
+        # Add npu->nic pcie connections
         for npu_idx in range(npu_count):
             connections.append(
                 infra.ComponentConnection(
@@ -52,15 +76,28 @@ class GenericHost(bld.HostBuilder):
                     )
                 )
             )
+
+        # Add nvlink connections if bandwidth was provided
+        if nvlink_bandwidth_gbps > 0:
+            components[nvswitch.name] = nvswitch
+            links[nvlink.name] = nvlink
+            for npu_idx_a in range(npu_count):
+                connections.append(
+                    infra.ComponentConnection(
+                        link=infra.ComponentLink(
+                            c1=npu.name,
+                            c1_index=npu_idx_a,
+                            link=nvlink.name,
+                            c2=nvswitch.name,
+                            c2_index=0,
+                        )
+                    )
+                )
+
         self._device = infra.Device(
             name=self.name,
-            components={
-                npu.name: npu,
-                self._port_component.name: self._port_component,
-            },
-            links={
-                pcie.name: pcie,
-            },
+            components=components,
+            links=links,
             connections=connections,
         )
 
@@ -71,3 +108,4 @@ class GenericHost(bld.HostBuilder):
     @property
     def port_down_component(self) -> infra.Component:
         return None
+
