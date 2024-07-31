@@ -20,16 +20,16 @@ class GenericHost(bld.HostBuilder):
     def __init__(
         self,
         npu_count=1,
-        nvlink_bandwidth_gbps: int=0
+        io_interconnect_bandwidth_gbps: int=0
     ):
         """Creates a generic device with only npu and nic components that are
         connected by a pcie link. 
 
-        Optionally, npu components can be connected via nvlink using a single nvswitch.
+        Optionally, npu components within a device can be interconnected via generic links attached to a single generic switch.
 
         name: The name of the generic device
         npu_count: The number of npu/nic components in the device.
-        nvlink_bandwidth_gbps: nvlink bandwidth in gigabits per second. If 0, no nvlink connections will be added to the device.
+        io_interconnect_bandwidth_gbps: npu-to-npu interconnect bandwidth in gigabits per second. If 0, no internal npu-to-npu connectivity will be added to the device.
         """
         super(GenericHost).__init__()
         npu = infra.Component(
@@ -46,15 +46,15 @@ class GenericHost(bld.HostBuilder):
             name="pcie",
             type=infra.LinkType.LINK_PCIE,
         )
-        nvlink = infra.Link(
-            name="nvlink",
-            type=infra.LinkType.LINK_NVLINK,
-            bandwidth=infra.Bandwidth(gbps=nvlink_bandwidth_gbps),
+        io_interconnect = infra.Link(
+            name="io_interconnect",
+            type=infra.LinkType.LINK_CUSTOM,
+            bandwidth=infra.Bandwidth(gbps=io_interconnect_bandwidth_gbps),
         )
-        nvswitch = infra.Component(
-            name="nvswitch",
+        io_interconnect_switch = infra.Component(
+            name="io_interconnect_switch",
             count=1,
-            switch=infra.Switch(nvlink=infra.NvLink()),
+            switch=infra.Switch(custom=infra.Custom()),
         )
 
         links = { pcie.name: pcie }
@@ -77,18 +77,18 @@ class GenericHost(bld.HostBuilder):
                 )
             )
 
-        # Add nvlink connections if bandwidth was provided
-        if nvlink_bandwidth_gbps > 0:
-            components[nvswitch.name] = nvswitch
-            links[nvlink.name] = nvlink
+        # Add io_interconnect connections if bandwidth was provided
+        if io_interconnect_bandwidth_gbps > 0:
+            components[io_interconnect_switch.name] = io_interconnect_switch
+            links[io_interconnect.name] = io_interconnect
             for npu_idx_a in range(npu_count):
                 connections.append(
                     infra.ComponentConnection(
                         link=infra.ComponentLink(
                             c1=npu.name,
                             c1_index=npu_idx_a,
-                            link=nvlink.name,
-                            c2=nvswitch.name,
+                            link=io_interconnect.name,
+                            c2=io_interconnect_switch.name,
                             c2_index=0,
                         )
                     )
