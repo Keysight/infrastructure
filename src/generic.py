@@ -20,7 +20,7 @@ class GenericHost(bld.HostBuilder):
     def __init__(
         self,
         npu_count=1,
-        io_interconnect_bandwidth_gbps: int=0
+        npu_interconnect_bandwidth_gbps: int=0
     ):
         """Creates a generic device with only npu and nic components that are
         connected by a pcie link. 
@@ -29,7 +29,7 @@ class GenericHost(bld.HostBuilder):
 
         name: The name of the generic device
         npu_count: The number of npu/nic components in the device.
-        io_interconnect_bandwidth_gbps: npu-to-npu interconnect bandwidth in gigabits per second. If 0, no internal npu-to-npu connectivity will be added to the device.
+        npu_interconnect_bandwidth_gbps: npu-to-npu interconnect bandwidth in gigabits per second. If 0, no internal npu-to-npu connectivity will be added to the device.
         """
         super(GenericHost).__init__()
         npu = infra.Component(
@@ -46,13 +46,13 @@ class GenericHost(bld.HostBuilder):
             name="pcie",
             type=infra.LinkType.LINK_PCIE,
         )
-        io_interconnect = infra.Link(
-            name="io_interconnect",
+        npu_interconnect = infra.Link(
+            name="npu_interconnect",
             type=infra.LinkType.LINK_CUSTOM,
-            bandwidth=infra.Bandwidth(gbps=io_interconnect_bandwidth_gbps),
+            bandwidth=infra.Bandwidth(gbps=npu_interconnect_bandwidth_gbps),
         )
-        io_interconnect_switch = infra.Component(
-            name="io_interconnect_switch",
+        npu_interconnect_switch = infra.Component(
+            name="npu_interconnect_switch",
             count=1,
             switch=infra.Switch(custom=infra.Custom()),
         )
@@ -77,18 +77,18 @@ class GenericHost(bld.HostBuilder):
                 )
             )
 
-        # Add io_interconnect connections if bandwidth was provided
-        if io_interconnect_bandwidth_gbps > 0:
-            components[io_interconnect_switch.name] = io_interconnect_switch
-            links[io_interconnect.name] = io_interconnect
+        # Add npu_interconnect connections if bandwidth was provided
+        if npu_interconnect_bandwidth_gbps > 0:
+            components[npu_interconnect_switch.name] = npu_interconnect_switch
+            links[npu_interconnect.name] = npu_interconnect
             for npu_idx_a in range(npu_count):
                 connections.append(
                     infra.ComponentConnection(
                         link=infra.ComponentLink(
                             c1=npu.name,
                             c1_index=npu_idx_a,
-                            link=io_interconnect.name,
-                            c2=io_interconnect_switch.name,
+                            link=npu_interconnect.name,
+                            c2=npu_interconnect_switch.name,
                             c2_index=0,
                         )
                     )
