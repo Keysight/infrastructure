@@ -141,130 +141,88 @@ message ComponentLink {
   uint32 c2_index = 5;
 }
 
-message ComponentConnection {
-  oneof type {
-    // link is the explicit description of the connection of
-    // two unique Components in a Device
-    ComponentLink link = 1;
-    // string is a short form of the ComponentLink message which is a
-    // a concatentation of the ComponentLink field values separated by a comma
-    // at the link name
-    // <c1>.<c1_index>,<link>,<c2>.<c2_index>
-    // e.g., cpu.0,pcie,nic.0
-    string string = 2;
-  }
-}
-
 // Device contains collections of components and links and the connections
 // between those components
 message Device {
   // the name of the device
   string name = 1;
+
   // collection of unique components in the device
   map<string, Component> components = 3;
+
   // collection of unique links in the device
   map<string, Link> links = 4;
+
   // a list of connections that describe how Components are connected to each
   // other in the Device
-  repeated ComponentConnection connections = 5;
+  repeated ComponentLink connections = 5;
 }
 
-// DeviceLink describes the connection between components of different devices
-// A different device can be the same name of a device but the index must not
-// be the same
+message DeviceInstances {
+  // the name of the device instances in the topology
+  // it should be used to categorize the devices
+  // for example it can be Dgx1Host, ZionexHost, RackSwitch, PodSwitch,
+  // SpineSwitch etc.
+  string name = 1;
+
+  // the name of an actual device that exists in the Infrastructure.devices field
+  // this allows for a Device to be reused.
+  string device_name = 2;
+
+  // the number of instances of the device in the infrastructure under this name
+  uint32 count = 3;
+}
+
 message DeviceLink {
-  // an Infrastructure.devices[name]
+  // Infrastructure.device_instances[name]
   string d1 = 1;
-  // 0 based index < Infrastructure.devices[d1].count
+
+  // 0 based index < Infrastructure.device_instances.count
   uint32 d1_index = 2;
-  // an Infrastructure.devices[d1].components[name]
+
+  // Infrastructure.device_instances.device.components.name
   string c1 = 3;
-  // 0 based index < Infrastructure.devices[d1].components[c1].count
+
+  // 0 based index < Infrastructure.device_instances.devices[d1].components[c1].count
   uint32 c1_index = 4;
+
   // Infrastructure.links[name]
   string link = 5;
-  // an Infrastructure.devices[name] != d1
+
+  // Infrastructure.device_instances[name] != d1
   string d2 = 6;
-  // 0 based index < Infrastructure.devices[d2].count
+
+  // 0 based index < Infrastructure.device_instances.count
   uint32 d2_index = 7;
-  // a Infrastructure.devices[d2].components[name]
+
+  // Infrastructure.device_instances.device.components.name != c1
   string c2 = 8;
-  // a 0 based index < Infrastructure.devices[d2].components[c2].count
+
+  // 0 based index < Infrastructure.device_instances.devices[d1].components[c1].count
   uint32 c2_index = 9;
 }
 
-message DeviceConnection {
-  oneof type {
-    // connection detail is an explicit way of describing a connection between
-    // two unique Devices
-    DeviceLink link = 1;
-    // connection is a short form of the DeviceLink message which is a
-    // a concatentation of the DeviceLink field values separated by a comma
-    // <d1>.<d1_index><c1.<c1_index>,<link>,<d2>.<d2_index>.<c2>.<c2_index>
-    // e.g., host.0.nic.0,eth,rack.0.nic.0
-    string string = 2;
-  }
-}
-
-// DeviceCount allows for specifying multiple instances of a Device in the
-// Infrastructure message
-message DeviceCount {
-  // The number of these devices in the infrastructure
-  uint32 count = 1;
-  // the device definition
-  Device device = 2;
-}
-
-// CustomFabric is an abstract collection of messages used to describe a fabric
-// consisting of a collection of devices, links and connections between those devices
-message CustomFabric {
-  // the name of the custom infrastructure
-  string name = 1;
-  // a map of all the different Device messages and their counts that exist
-  // in the custom fabric
-  map<string, DeviceCount> devices = 2;
-  // a map of all the different links that exist in the custom fabric
-  map<string, Link> links = 3;
-  // a list of the DeviceConnection messages that describe how Devices are
-  // connected to each other in the custom fabric
-  repeated DeviceConnection connections = 4;
-}
-
-// ClosFabric is a structured collection of host/rack/pod/spine devices,
-// links and connections between those devices
-message ClosFabric {
-  // describes the lowest tier of switches
-  DeviceCount rack_switches = 2;
-  // describes the middle tier of switches
-  DeviceCount pod_switches = 3;
-  // describes the highest tier of switches
-  DeviceCount spine_switches = 4;
-  // describes the links used in the connections field
-  map<string, Link> links = 5;
-  // describes the connections between the switch devices
-  repeated DeviceConnection connections = 6;
-}
-
-//describes a collection of host objects
-message Hosts {
-  // definition of the host devices
-  DeviceCount devices = 1;
-}
-
-// Infrastructure is a combination of host devices, fabric devices,
-// and the connections between them
+// The Infrastructure message captures the connectivity present between DeviceInstances.
+// An infrastructure can be as small as a single host connected to a switch or
+// as large as multiple data centers each with different fabrics that are interconnected.
 message Infrastructure {
-  // describes the collection of host objects
-  Hosts hosts = 1;
+  // A collection of all unique types of devices in the infrastructure
+  // There should only be one entry per device type.
+  // This list is not an instance list, for eg, you define one DGX1 or ZionEx
+  // device and use the DeviceInstances message to scale up the number those
+  // devices.
+  map<string, Device> devices = 1;
 
-  // describes the fabric and the devices in it
-  oneof fabricType {
-    CustomFabric custom_fabric = 2;
-    ClosFabric clos_fabric = 3;
-  }
+  // A collection of all unique types of links in the infrastructure.
+  // There should only be one entry per link type.
+  // These links are used multiple times when defining connections between
+  // DeviceInstances messages.
+  map<string, Link> links = 2;
 
-  //describes the links used to connect the host devices and the fabric
-  map<string, Link> links = 4;
-  // describes the connections between the host devices and the fabric
-  repeated DeviceConnection connections = 5;
+  // A list of the device instances that represents the total number of devices
+  // in the infrastructure.
+  map<string, DeviceInstances> device_instances = 10;
+
+  // A list of all the connections between device_instances
+  repeated DeviceLink connections = 20;
 }
