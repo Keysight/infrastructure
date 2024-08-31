@@ -176,6 +176,11 @@ message DeviceInstances {
   repeated ChakraProtoMsg.AttributeProto attributes = 100;
 }
 
+// The DeviceLink message is meant to establish a one to one logical relationship
+// between one device_instance+component and another device_instance+component
+// separated by a link.
+// The device_instance/device/component/link must exist in the Infrastructure
+// and this message reuses the names of those.
 message DeviceLink {
   // Infrastructure.device_instances[name]
   string d1 = 1;
@@ -205,7 +210,29 @@ message DeviceLink {
   uint32 c2_index = 9;
 }
 
-// The Infrastructure message captures the connectivity present between DeviceInstances.
+// The Binding message establishes a binding between a logical device+component
+// to physical endpoint information captured in user provided attributes.
+// ie host.0.nic.0 -> server.com/eth0
+message Binding {
+  // logical device name
+  string device_name = 1;
+
+  // 0 based logical device instance
+  uint32 device_index = 2;
+
+  // logical component name
+  uint32 component_name = 3;
+
+  // 0 based logical component index
+  uint32 component_index = 4;
+
+  // physical binding attributes
+  // this should be user defined
+  repeated ChakraProtoMsg.AttributeProto physical = 100;
+}
+
+// The Infrastructure message establishes an inventory of Device(s) and Link(s)
+// a number of DeviceInstances and logical connectivity between instances.
 // An infrastructure can be as small as a single host connected to a switch or
 // as large as multiple data centers each with different fabrics that are interconnected.
 message Infrastructure {
@@ -228,4 +255,7 @@ message Infrastructure {
 
   // A list of all the connections between device_instances
   repeated DeviceLink connections = 20;
+
+  // A list of logical to physical bindings
+  repeated Biding bindings = 30;
 }
