@@ -257,5 +257,5 @@ message Infrastructure {
   repeated DeviceLink connections = 20;
 
   // A list of logical to physical bindings
-  repeated Biding bindings = 30;
+  repeated Binding bindings = 30;
 }
