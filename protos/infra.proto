@@ -171,6 +171,9 @@ message DeviceInstances {
 
   // the number of instances of the device in the infrastructure under this name
   uint32 count = 3;
+
+  // custom attributes at the instance level
+  repeated ChakraProtoMsg.AttributeProto attributes = 100;
 }
 
 message DeviceLink {
