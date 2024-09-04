@@ -26,7 +26,7 @@ message CustomAttribute {
   // nic_config = NicConfig()
   // if attr.any_val.Is(NicConfig.DESCRIPTOR):
   //   attr.any_val.Unpack(nic_config)
-  google.protobuf.Any any_val = 3;
+  google.protobuf.Any value = 3;
 }
 
 enum MemoryType {
@@ -288,15 +288,15 @@ message Binding {
 // DeviceInstance, DeviceLink, ConnectionLink messages
 message Inventory {
   // A collection of all unique types of devices in the infrastructure
-  // There should only be one entry per device type.
+  // Uniquess is determined by the Device.name field.
   // This list is not an instance list, for eg, you define one DGX1 or ZionEx
-  // device and use the DeviceInstances message to scale up the number those
+  // device and use the DeviceInstances message to scale up the number of those
   // devices.
   map<string, Device> devices = 1;
 
   // A collection of all unique types of links in the infrastructure.
-  // These links can be reused multiple times when creating ConnectionLink and
-  // DeviceLink messages.
+  // These links can be reused multiple times when creating ComponentConnection
+  // and DeviceConnection messages.
   map<string, Link> links = 2;
 }
 
