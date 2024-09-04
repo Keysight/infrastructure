@@ -13,51 +13,17 @@ message AttributeProto {
   string name = 1;
   string doc_string = 2;
 
-  oneof value {
-    double double_val = 3;
-    repeated double double_list = 4;
-    float float_val = 5;
-    repeated float float_list = 6;
-    int32 int32_val = 7;
-    repeated int32 int32_list = 8;
-    int64 int64_val = 9;
-    repeated int64 int64_list = 10;
-    uint32 uint32_val = 11;
-    repeated uint32 uint32_list = 12;
-    uint64 uint64_val = 13;
-    repeated uint64 uint64_list = 14;
-    sint32 sint32_val = 15;
-    repeated sint32 sint32_list = 16;
-    sint64 sint64_val = 17;
-    repeated sint64 sint64_list = 18;
-    fixed32 fixed32_val = 19;
-    repeated fixed32 fixed32_list = 20;
-    fixed64 fixed64_val = 21;
-    repeated fixed64 fixed64_list = 22;
-    sfixed32 sfixed32_val = 23;
-    repeated sfixed32 sfixed32_list = 24;
-    sfixed64 sfixed64_val = 25;
-    repeated sfixed64 sfixed64_list = 26;
-    bool bool_val = 27;
-    repeated bool bool_list = 28;
-    string string_val = 29;
-    repeated string string_list = 30;
-    bytes bytes_val = 31;
-    repeated bytes bytes_list = 32;
-
-    // # how to pack a proto message into AttributeProto.any_val
-    // nic_config = NicConfig()
-    // any_message = Any()
-    // any_message.Pack(nic_config)
-    // attr = AttributeProto(name="proto message", any_val=any_message)
-    //
-    // # how to unpack an AttributeProto.any_val message into a message
-    // nic_config = NicConfig()
-    // if attr.any_val.Is(NicConfig.DESCRIPTOR):
-    //   attr.any_val.Unpack(nic_config)
-    google.protobuf.Any any_val = 33;
-    repeated google.protobuf.Any any_list = 34;
-  }
+  // # how to pack a proto message into AttributeProto.any_val
+  // nic_config = NicConfig()
+  // any_message = Any()
+  // any_message.Pack(nic_config)
+  // attr = AttributeProto(name="proto message", any_val=any_message)
+  //
+  // # how to unpack an AttributeProto.any_val message into a message
+  // nic_config = NicConfig()
+  // if attr.any_val.Is(NicConfig.DESCRIPTOR):
+  //   attr.any_val.Unpack(nic_config)
+  google.protobuf.Any any_val = 3;
 }
 
 enum MemoryType {
@@ -356,12 +322,22 @@ message VertextRequest {
   Infrastructure infrastructure = 1;
 }
 
+message VertexResponse {
+  repeated ComponentConnection component_edges = 1;
+  repeated DeviceConnection device_instance_edges = 2;
+}
+
 message EdgeRequest {
   Infrastructure infrastructure = 1;
 }
 
+message EdgeResponse {
+  repeated ComponentConnection component_edges = 1;
+  repeated DeviceConnection device_instance_edges = 2;
+}
+
 service InfraService {
-  rpc GetVertexes(Infrastructure) returns (VertexesResponse);
-  rpc GetEdges(Infrastructure) return (EdgesResponse);
+  rpc GetVertexes(Infrastructure) returns (VertexResponse);
+  rpc GetEdges(Infrastructure) returns (EdgeResponse);
   rpc Validate(Infrastructure) returns (google.protobuf.Empty);
 }
