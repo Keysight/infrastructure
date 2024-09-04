@@ -1,18 +1,74 @@
 // infra.proto
-// An abstract data model for describing static infrastructure as a graph.
+//
+// A data model for describing infrastructure as a graph.
 
 syntax = "proto3";
 
 package infra;
 
-import "et_def.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+
+message AttributeProto {
+  string name = 1;
+  string doc_string = 2;
+
+  oneof value {
+    double double_val = 3;
+    repeated double double_list = 4;
+    float float_val = 5;
+    repeated float float_list = 6;
+    int32 int32_val = 7;
+    repeated int32 int32_list = 8;
+    int64 int64_val = 9;
+    repeated int64 int64_list = 10;
+    uint32 uint32_val = 11;
+    repeated uint32 uint32_list = 12;
+    uint64 uint64_val = 13;
+    repeated uint64 uint64_list = 14;
+    sint32 sint32_val = 15;
+    repeated sint32 sint32_list = 16;
+    sint64 sint64_val = 17;
+    repeated sint64 sint64_list = 18;
+    fixed32 fixed32_val = 19;
+    repeated fixed32 fixed32_list = 20;
+    fixed64 fixed64_val = 21;
+    repeated fixed64 fixed64_list = 22;
+    sfixed32 sfixed32_val = 23;
+    repeated sfixed32 sfixed32_list = 24;
+    sfixed64 sfixed64_val = 25;
+    repeated sfixed64 sfixed64_list = 26;
+    bool bool_val = 27;
+    repeated bool bool_list = 28;
+    string string_val = 29;
+    repeated string string_list = 30;
+    bytes bytes_val = 31;
+    repeated bytes bytes_list = 32;
+
+    // # how to pack a proto message into AttributeProto.any_val
+    // nic_config = NicConfig()
+    // any_message = Any()
+    // any_message.Pack(nic_config)
+    // attr = AttributeProto(name="proto message", any_val=any_message)
+    //
+    // # how to unpack an AttributeProto.any_val message into a message
+    // nic_config = NicConfig()
+    // if attr.any_val.Is(NicConfig.DESCRIPTOR):
+    //   attr.any_val.Unpack(nic_config)
+    google.protobuf.Any any_val = 33;
+    repeated google.protobuf.Any any_list = 34;
+  }
+}
 
 enum MemoryType {
   MEM_UNSPECIFIED = 0;
+
   // random access memory
   MEM_RAM = 1;
+
   // high bandwidth memory interface for 3D stacked sync dynamic random-access memory
   MEM_HBM = 2;
+
   // memory that uses compute express link interconnect to the cpu
   MEM_CXL = 3;
 }
@@ -59,24 +115,27 @@ message Switch {
 message Component {
   // the name of the component
   string name = 1;
+
   // the number of this type of component
   uint32 count = 2;
+
   // the type of component
   oneof type {
     // a custom component that does not fall into one of the other messages within this type
     CustomComponent custom = 10;
+
     // cpu component configuration
     Cpu cpu = 11;
+
     // npu component configuration
     Npu npu = 12;
+
     // nic component configuration
     Nic nic = 13;
+
     // switch component configuration
     Switch switch = 14;
   }
-  // a list of custom attributes to allow for the specification of information
-  // not provided by the current message structure
-  repeated ChakraProtoMsg.AttributeProto attributes = 100;
 }
 
 enum LinkType {
@@ -116,29 +175,64 @@ message Latency {
 message Link {
   // name of the link
   string name = 1;
+
   // type of link
   LinkType type = 2;
+
   // NOTE: the following fields are currently being discussed
   // and are subject to change
   Bandwidth bandwidth = 10;
+
   Latency latency = 11;
-  // a list of custom attributes to allow for the specification of information
-  // not provided by the current message structure
-  repeated ChakraProtoMsg.AttributeProto attributes = 100;
 }
 
-// ComponentLink describes the link of specific components inside a device
-message ComponentLink {
-  // Device.components.name
-  string c1 = 1;
-  // 0 based index < Device.components.count
-  uint32 c1_index = 2;
-  // Link.name
-  string link = 3;
-  // Device.components.name
-  string c2 = 4;
-  // 0 based index < Device.components.count
-  uint32 c2_index = 5;
+message ComponentConnection {
+  // a list of connections that describe how Components are connected to each
+  // other in a single Device
+  //
+  // format: The following pieces of information each separated by a "."
+  // An * indicates all possible indexes for a component will be mapped
+  // In the case where an * is used for both indexes then the mapping will be
+  // a one-to-one mapping.
+  //
+  // - name = Component.name (nic)
+  // - index = (< Component.count | *)
+  // - name = Component.links.name (pcie)
+  // - name = Component.name (nic)
+  // - index = (< Component.count | *)
+  //
+  // examples:
+  //   nic.0.pcie.cpu.0
+  //   npu.*.pcie.cpu.0
+  //
+  // the connections can be validated by using the Validate rpc
+  string connection = 1;
+}
+
+message DeviceConnection {
+  // a list of connections that describe how Components are connected to each
+  // other in the Device
+  //
+  // format: The following pieces of information each separated by a "."
+  // An * indicates all possible indexes for a component will be mapped
+  // In the case where an * is used for both indexes then the mapping will be
+  // a one-to-one mapping.
+  //
+  // - name = DeviceInstance.name
+  // - index = (< DeviceInstance.count | *)
+  // - name = Component.name (nic)
+  // - index = (< Component.count | *)
+  // - name = DeviceInstance.name
+  // - index = (< DeviceInstance.count | *)
+  // - name = Component.name (nic)
+  // - index = (< Component.count | *)
+  //
+  // examples:
+  //   host.0.nic.0.ethernet.cpu.0
+  //   npu.*.pcie.cpu.0
+  //
+  // the connections can be validated by using the Validate rpc
+  string connection = 1;
 }
 
 // Device contains collections of components and links and the connections
@@ -148,14 +242,13 @@ message Device {
   string name = 1;
 
   // collection of unique components in the device
-  map<string, Component> components = 3;
+  repeated Component components = 3;
 
   // collection of unique links in the device
-  map<string, Link> links = 4;
+  repeated Link links = 4;
 
-  // a list of connections that describe how Components are connected to each
-  // other in the Device
-  repeated ComponentLink connections = 5;
+  // a list of connections that describe how Components are connected
+  repeated ComponentConnection connections = 5;
 }
 
 message DeviceInstances {
@@ -165,77 +258,65 @@ message DeviceInstances {
   // SpineSwitch etc.
   string name = 1;
 
-  // the name of an actual device that exists in the Infrastructure.devices field
+  // the name of an actual device that exists in the
+  // Infrastructure.inventory.devices field
   // this allows for a Device to be reused.
-  string device_name = 2;
+  string device = 2;
 
   // the number of instances of the device in the infrastructure under this name
   uint32 count = 3;
-
-  // custom attributes at the instance level
-  repeated ChakraProtoMsg.AttributeProto attributes = 100;
 }
 
-// The DeviceLink message is meant to establish a one to one logical relationship
-// between one device_instance+component and another device_instance+component
-// separated by a link.
-// The device_instance/device/component/link must exist in the Infrastructure
-// and this message reuses the names of those.
-message DeviceLink {
-  // Infrastructure.device_instances[name]
-  string d1 = 1;
-
-  // 0 based index < Infrastructure.device_instances.count
-  uint32 d1_index = 2;
-
-  // Infrastructure.device_instances.device.components.name
-  string c1 = 3;
-
-  // 0 based index < Infrastructure.device_instances.devices[d1].components[c1].count
-  uint32 c1_index = 4;
-
-  // Infrastructure.links[name]
-  string link = 5;
-
-  // Infrastructure.device_instances[name] != d1
-  string d2 = 6;
-
-  // 0 based index < Infrastructure.device_instances.count
-  uint32 d2_index = 7;
-
-  // Infrastructure.device_instances.device.components.name != c1
-  string c2 = 8;
-
-  // 0 based index < Infrastructure.device_instances.devices[d1].components[c1].count
-  uint32 c2_index = 9;
-}
-
-// The Binding message establishes a binding between a logical device+component
-// to physical endpoint information captured in user provided attributes.
-// ie host.0.nic.0 -> server.com/eth0
+// The Binding message offers the option of binding different types of logical
+// Infrastructure endpoints to custom attributes.
+//
+// The oneof type allows for attributes to be applied at a macro level such as
+// all devices or at a micro level such as an individual component in a
+// specific device.
+//
+// The custom attributes allows for user defined information including but not
+// limited to configuration, location, identification.
+// It can be as simple as a single attribute or a custom proto message
+// packed into an Any type.
 message Binding {
-  // logical device name
-  string device_name = 1;
+  oneof type {
+    // a device name in the Infrastructures.devices list
+    // example: dgx1
+    string device = 1;
 
-  // 0 based logical device instance
-  uint32 device_index = 2;
+    // a device name and device index ie dgx1.0
+    string device_index = 2;
 
-  // logical component name
-  uint32 component_name = 3;
+    // string path of DeviceName.DeviceIndex.ComponentName
+    // example: dgx1.0.npu
+    string component_name = 3;
 
-  // 0 based logical component index
-  uint32 component_index = 4;
+    // string path of DeviceName.DeviceIndex.ComponentName.ComponentIndex
+    // example: dgx1.0.npy.0
+    string component_index = 4;
 
-  // physical binding attributes
-  // this should be user defined
-  repeated ChakraProtoMsg.AttributeProto physical = 100;
+    // a Device instance name
+    // example: rack-switch
+    string device_instance = 5;
+
+    // string path of DeviceInstanceName.DeviceInstanceIndex
+    // example: rack-switch.0
+    string device_instance_index = 6;
+  }
+
+  // custom information that can be as simple as a single attribute or as
+  // complex as a proto/json/yaml message
+  //
+  // attributes allow for complete flexibility to accomodate any combination
+  // of userinformation
+  repeated AttributeProto attributes = 100;
 }
 
-// The Infrastructure message establishes an inventory of Device(s) and Link(s)
-// a number of DeviceInstances and logical connectivity between instances.
-// An infrastructure can be as small as a single host connected to a switch or
-// as large as multiple data centers each with different fabrics that are interconnected.
-message Infrastructure {
+// The Inventory message is a collection of unique devices and links present
+// in the infrastructure.
+// The devices and links in the inventory are meant to be reused in
+// DeviceInstance, DeviceLink, ConnectionLink messages
+message Inventory {
   // A collection of all unique types of devices in the infrastructure
   // There should only be one entry per device type.
   // This list is not an instance list, for eg, you define one DGX1 or ZionEx
@@ -244,18 +325,43 @@ message Infrastructure {
   map<string, Device> devices = 1;
 
   // A collection of all unique types of links in the infrastructure.
-  // There should only be one entry per link type.
-  // These links are used multiple times when defining connections between
-  // DeviceInstances messages.
+  // These links can be reused multiple times when creating ConnectionLink and
+  // DeviceLink messages.
   map<string, Link> links = 2;
+}
+
+// The Infrastructure message establishes an inventory of devices and links,
+// instances of the inventory, connectivity between those instances and
+// any custom user information about devices, components, links and instances.
+//
+// The Infrastructure can be as small as a single host connected to a switch or
+// as large as multiple data centers each with different fabrics that are
+// interconnected.
+message Infrastructure {
+  // The inventory of devices and links present in the infrastructure
+  Inventory inventory = 1;
 
   // A list of the device instances that represents the total number of devices
   // in the infrastructure.
-  map<string, DeviceInstances> device_instances = 10;
+  repeated DeviceInstances device_instances = 10;
 
-  // A list of all the connections between device_instances
-  repeated DeviceLink connections = 20;
+  // A list that describes how device instances are connected
+  repeated DeviceConnection connections = 20;
 
-  // A list of logical to physical bindings
+  // A list of user supplied custom information for specific endpoints
   repeated Binding bindings = 30;
+}
+
+message VertextRequest {
+  Infrastructure infrastructure = 1;
+}
+
+message EdgeRequest {
+  Infrastructure infrastructure = 1;
+}
+
+service InfraService {
+  rpc GetVertexes(Infrastructure) returns (VertexesResponse);
+  rpc GetEdges(Infrastructure) return (EdgesResponse);
+  rpc Validate(Infrastructure) returns (google.protobuf.Empty);
 }
