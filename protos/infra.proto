@@ -164,41 +164,39 @@ message ComponentConnection {
   // In the case where an * is used for both indexes then the mapping will be
   // a one-to-one mapping.
   //
-  // - name = Component.name (nic)
-  // - index = (< Component.count | *)
-  // - name = Component.links.name (pcie)
-  // - name = Component.name (nic)
-  // - index = (< Component.count | *)
+  // - name = Component.name
+  // - index < Component.count
+  // - name = Link.name from one of Component.links
+  // - name = Component.name
+  // - index < Component.count
   //
   // examples:
   //   nic.0.pcie.cpu.0
-  //   npu.*.pcie.cpu.0
+  //   npu.0.pcie.nwswitch.0
   //
   // the connections can be validated by using the Validate rpc
   string connection = 1;
 }
 
+// DeviceConnection message describes how Devices are connected to each other
 message DeviceConnection {
-  // a list of connections that describe how Components are connected to each
-  // other in the Device
-  //
   // format: The following pieces of information each separated by a "."
   // An * indicates all possible indexes for a component will be mapped
   // In the case where an * is used for both indexes then the mapping will be
   // a one-to-one mapping.
   //
   // - name = DeviceInstance.name
-  // - index = (< DeviceInstance.count | *)
-  // - name = Component.name (nic)
-  // - index = (< Component.count | *)
+  // - index < DeviceInstance.count
+  // - name = Component.name
+  // - index < Component.count
+  // - name = Link.name from one of Infrastructure.inventory.links
   // - name = DeviceInstance.name
-  // - index = (< DeviceInstance.count | *)
-  // - name = Component.name (nic)
-  // - index = (< Component.count | *)
+  // - index < DeviceInstance.count
+  // - name = Component.name
+  // - index < Component.count
   //
   // examples:
-  //   host.0.nic.0.ethernet.cpu.0
-  //   npu.*.pcie.cpu.0
+  //   host.0.nic.0.100gpbs.racksw.0.nic.0
   //
   // the connections can be validated by using the Validate rpc
   string connection = 1;
