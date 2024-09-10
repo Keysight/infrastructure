@@ -174,7 +174,6 @@ message ComponentConnection {
   //   nic.0.pcie.cpu.0
   //   npu.0.pcie.nwswitch.0
   //
-  // the connections can be validated by using the Validate rpc
   string connection = 1;
 }
 
@@ -197,8 +196,8 @@ message DeviceConnection {
   //
   // examples:
   //   host.0.nic.0.100gpbs.racksw.0.nic.0
+  //   host.0.nic.0-8.100gpbs.racksw.0.nic.8-15
   //
-  // the connections can be validated by using the Validate rpc
   string connection = 1;
 }
 
@@ -318,28 +317,4 @@ message Infrastructure {
 
   // A list of user supplied custom information for specific endpoints
   repeated Binding bindings = 30;
-}
-
-message VertextRequest {
-  Infrastructure infrastructure = 1;
-}
-
-message VertexResponse {
-  repeated ComponentConnection component_edges = 1;
-  repeated DeviceConnection device_instance_edges = 2;
-}
-
-message EdgeRequest {
-  Infrastructure infrastructure = 1;
-}
-
-message EdgeResponse {
-  repeated ComponentConnection component_edges = 1;
-  repeated DeviceConnection device_instance_edges = 2;
-}
-
-service InfraService {
-  rpc GetVertexes(Infrastructure) returns (VertexResponse);
-  rpc GetEdges(Infrastructure) returns (EdgeResponse);
-  rpc Validate(Infrastructure) returns (google.protobuf.Empty);
 }
