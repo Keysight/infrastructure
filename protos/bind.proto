@@ -1,0 +1,116 @@
+// bind.proto
+//
+// A data model to describe binding infrastructure paths to third party
+// information.
+
+syntax = "proto3";
+
+package bind;
+
+import "google/protobuf/any.proto";
+
+message CustomAttribute {
+  // Use this field to provide descriptive information about the message
+  // that is packed into the value field.
+  string name = 1;
+
+  // The value field can be used to store external information outside the
+  // scope of these protobuf messages.
+  //
+  // In addition to custom messages any wellknown type can be set into an
+  // Any message. See the following reference for details:
+  // https://protobuf.dev/reference/protobuf/google.protobuf/
+  //
+  // # The following is a python example of how to serialize a proto message
+  // into the value field of the CustomAttribute message.
+  // custom_msg = CustomMessage()
+  // any_message = Any()
+  // any_message.Pack(custom_msg)
+  // custom_attr = CustomAttribute(name="a custom message", value=custom_msg)
+  //
+  // # How to deserialize the contents of CustomAttribute.value into a message
+  // custom_msg = CustomMessage()
+  // if attr.value.Is(CustomMessage.DESCRIPTOR):
+  //   attr.value.Unpack(custom_msg)
+  google.protobuf.Any value = 3;
+}
+
+enum LocationFormat {
+  // not to be used
+  LOCATION_UNSPECIFIED = 0;
+
+  // location is global
+  LOCATION_INFRASTRUCTURE = 1;
+
+  // location is a Infrastructure.inventory.devices.name
+  // example: dgx1
+  LOCATION_DEVICE = 2;
+
+  // location device index is an instance of
+  // Infrastructure.inventory.devices.name
+  // example: dgx1.1
+  LOCATION_DEVICE_INDEX = 3;
+
+  // location device index component is an instance of
+  // Infrastructure.inventory.devices.name and component.name
+  // example: dgx1.1.nic
+  LOCATION_DEVICE_INDEX_COMPONENT = 4;
+
+  // location device index component index is an instance of
+  // Infrastructure.inventory.devices.name and an instance of a component.name
+  // example: dgx1.1.nic.1
+  LOCATION_DEVICE_INDEX_COMPONENT_INDEX = 5;
+
+  // location device instance is an instance of
+  // Infrastructure.device_instances.name
+  LOCATION_DEVICE_INSTANCE = 6;
+
+  // location device instance is an instance of
+  // Infrastructure.device_instances.name
+  // and an index < Infrastructure.device_instances.count
+  LOCATION_DEVICE_INSTANCE_INDEX = 7;
+
+  // location device instance component is an instance of
+  // Infrastructure.device_instances.name
+  // and an index < Infrastructure.device_instances.count
+  // and an Infrastructure.inventory.device.component.name
+  LOCATION_DEVICE_INSTANCE_INDEX_COMPONENT = 8;
+
+  // location device instance component is an instance of
+  // Infrastructure.device_instances.name
+  // and an index < Infrastructure.device_instances.count
+  // and an Infrastructure.inventory.device.component.name
+  // and an index < Infrastructure.inventory.device.component.name.index
+  LOCATION_DEVICE_INSTANCE_INDEX_COMPONENT_INDEX = 9;
+}
+
+// The Binding message offers the option of binding different types of logical
+// Infrastructure endpoints to custom attributes.
+//
+// The format allows for attributes to be applied at a macro level such as
+// all devices or at a micro level such as an individual component in a
+// specific device instance.
+//
+// The custom attributes allows for user defined information including but not
+// limited to configuration, location, identification.
+// Multiple custom attributes can be applied to a single binding value
+// packed into an Any type.
+message Binding {
+  // The format of the location value
+  LocationFormat format = 1;
+
+  // The location of infrastructure that matches the binding type format
+  string location = 2;
+
+  // custom information that can be as simple as a single attribute or as
+  // complex as a proto/json/yaml message
+  //
+  // attributes allow for complete flexibility to accomodate any combination
+  // of user defined information
+  repeated CustomAttribute attributes = 100;
+}
+
+message Bindings {
+  // A list of user defined information for specific endpoints
+  repeated Binding bindings = 1;
+}

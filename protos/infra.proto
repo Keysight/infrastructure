@@ -6,29 +6,6 @@ syntax = "proto3";
 
 package infra;
 
-import "google/protobuf/any.proto";
-import "google/protobuf/empty.proto";
-
-message CustomAttribute {
-  string name = 1;
-  string doc_string = 2;
-
-  // # in addition to custom messages any wellknown type can be set into Any
-  // https://protobuf.dev/reference/protobuf/google.protobuf/
-  //
-  // # how to pack a proto message into CustomAttribute.any_val
-  // nic_config = NicConfig()
-  // any_message = Any()
-  // any_message.Pack(nic_config)
-  // attr = CustomAttribute(name="proto message", any_val=any_message)
-  //
-  // # how to unpack an CustomAttribute.any_val message into a message
-  // nic_config = NicConfig()
-  // if attr.any_val.Is(NicConfig.DESCRIPTOR):
-  //   attr.any_val.Unpack(nic_config)
-  google.protobuf.Any value = 3;
-}
-
 enum MemoryType {
   MEM_UNSPECIFIED = 0;
 
@@ -129,17 +106,6 @@ message Bandwidth {
   }
 }
 
-message Latency {
-  oneof type {
-    // milliseond latency
-    uint64 ms = 1;
-    // microsecond latency
-    uint64 us = 2;
-    // nanonsecond latency
-    uint64 ns = 3;
-  }
-}
-
 // Link describes a link between Components
 message Link {
   // name of the link
@@ -148,11 +114,8 @@ message Link {
   // type of link
   LinkType type = 2;
 
-  // NOTE: the following fields are currently being discussed
-  // and are subject to change
+  // Describes the bandwidth of the link
   Bandwidth bandwidth = 10;
-
-  Latency latency = 11;
 }
 
 message ComponentConnection {
@@ -172,7 +135,7 @@ message ComponentConnection {
   //
   // examples:
   //   nic.0.pcie.cpu.0
-  //   npu.0.pcie.nwswitch.0
+  //   npu.0.pcie.nvswitch.0
   //
   string connection = 1;
 }
@@ -233,52 +196,6 @@ message DeviceInstances {
   uint32 count = 3;
 }
 
-enum LocationFormat {
-  // not to be used
-  LOCATION_UNSPECIFIED = 0;
-
-  // location is global
-  LOCATION_INFRASTRUCTURE = 1;
-
-  // location is a Infrastructure.inventory.devices.name
-  // example: dgx1
-  LOCATION_DEVICE = 2;
-
-  LOCATION_DEVICE_INDEX = 3;
-  LOCATION_DEVICE_INDEX_COMPONENT = 4;
-  LOCATION_DEVICE_INDEX_COMPONENT_INDEX = 5;
-  LOCATION_DEVICE_INSTANCE = 6;
-  LOCATION_DEVICE_INSTANCE_INDEX = 7;
-  LOCATION_DEVICE_INSTANCE_INDEX_COMPONENT = 8;
-  LOCATION_DEVICE_INSTANCE_INDEX_COMPONENT_INDEX = 9;
-}
-
-// The Binding message offers the option of binding different types of logical
-// Infrastructure endpoints to custom attributes.
-//
-// The format allows for attributes to be applied at a macro level such as
-// all devices or at a micro level such as an individual component in a
-// specific device instance.
-//
-// The custom attributes allows for user defined information including but not
-// limited to configuration, location, identification.
-// Multiple custom attributes can be applied to a single binding value
-// packed into an Any type.
-message Binding {
-  // The format of the binding value
-  LocationFormat location_format = 1;
-
-  // The location of infrastructure that matches the binding type format
-  string location_value = 2;
-
-  // custom information that can be as simple as a single attribute or as
-  // complex as a proto/json/yaml message
-  //
-  // attributes allow for complete flexibility to accomodate any combination
-  // of userinformation
-  repeated CustomAttribute attributes = 100;
-}
-
 // The Inventory message is a collection of unique devices and links present
 // in the infrastructure.
 // The devices and links in the inventory are meant to be reused in
@@ -314,7 +231,4 @@ message Infrastructure {
 
   // A list that describes how device instances are connected
   repeated DeviceConnection connections = 20;
-
-  // A list of user supplied custom information for specific endpoints
-  repeated Binding bindings = 30;
 }
