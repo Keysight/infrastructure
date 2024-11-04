@@ -24,4 +24,10 @@
     },
     "clang-format.language.proto.enable": true,
     "clang-format.language.proto.style": "{ IndentWidth: 2, BasedOnStyle: google, ReflowComments: false, ColumnLimit: 0, AlignTrailingComments: true }",
+    "python.testing.pytestArgs": [
+        "src/tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.envFile": "${workspaceFolder}/.env",
 }
