@@ -7,14 +7,14 @@ RackPlane block diagram.
 
 from typing import Tuple
 
-from src.closfabric import ClosFabricSwitch
-
 if __package__ is None or __package__ == "":
     import generated.infra_pb2 as infra
     import builders as bld
+    from keysight_chakra.closfabric import ClosFabricSwitch
 else:
     from .generated import infra_pb2 as infra
     from . import builders as bld
+    from .closfabric import ClosFabricSwitch
 
 
 class RackPlaneFabricBuilder(bld.FabricBuilder):
@@ -23,7 +23,7 @@ class RackPlaneFabricBuilder(bld.FabricBuilder):
     supports connecting to switching via multiple planes
     """
 
-    name: str = "rack plane fabric"
+    name: str = "RackPlaneFabric"
     description: str = "fabric that users multiple planes inside a rack"
     lowest_device: bld.DeviceBuilder = None
 
