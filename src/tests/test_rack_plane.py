@@ -63,9 +63,9 @@ def test_rack_plane_fabric_and_host_detailed():
         d2_index: int,
         c2_index: int,
     ):
-        assert dev_conn.link.d1 == "rack plane host"
+        assert dev_conn.link.d1 == "RackPlaneHost"
         assert dev_conn.link.c1 == "scale-up-nic"
-        assert dev_conn.link.d2 == "rack switch"
+        assert dev_conn.link.d2 == "RackSwitch"
         assert dev_conn.link.c2 == "port-down"
         assert dev_conn.link.link == "eth"
         assert dev_conn.link.d1_index == d1_index

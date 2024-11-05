@@ -19,7 +19,7 @@ class RackPlaneHostBuilder(bld.HostBuilder):
     supports connecting to switching via multiple planes
     """
 
-    name = "rack plane host"
+    name = "RackPlaneHost"
     description = "a host with dedicated scale up and scale out NICs"
 
     def __init__(
@@ -38,7 +38,10 @@ class RackPlaneHostBuilder(bld.HostBuilder):
         #     name="scale-out-nic", count=scale_out_nic_count, nic=infra.Nic()
         # )
 
-        # 2. Add device
+        # 2. Add link & device
+        # link is yet undetermined, using mii as placeholder with zero cost speed
+        mii_link = infra.Link(name="mii")
+
         self._device = infra.Device(
             name=self.name,
             components={
@@ -46,6 +49,7 @@ class RackPlaneHostBuilder(bld.HostBuilder):
                 scale_up_nic.name: scale_up_nic,
                 # scale_out_nic.name: scale_out_nic,
             },
+            links={mii_link.name: mii_link},
         )
 
         # 3. Add component links
@@ -55,21 +59,22 @@ class RackPlaneHostBuilder(bld.HostBuilder):
                 self._add_component_link(
                     npu.name,
                     c1_index,
-                    f"{npu.name}.{c1_index}.to.{scale_up_nic.name}.{c2_index}",
+                    mii_link.name,
                     scale_up_nic.name,
                     c2_index,
                 )
 
+        # TODO: Scale OUT NICs
         # scale OUT NICs to NPU connections
-        for c1_index in range(npu.count):
-            for c2_index in range(scale_up_nic.count):
-                self._add_component_link(
-                    npu.name,
-                    c1_index,
-                    f"{npu.name}.{c1_index=}.to.{scale_up_nic.name}.{c2_index}",
-                    scale_up_nic.name,
-                    c2_index,
-                )
+        # for c1_index in range(npu.count):
+        #     for c2_index in range(scale_up_nic.count):
+        #         self._add_component_link(
+        #             npu.name,
+        #             c1_index,
+        #             mii_link.name,
+        #             scale_up_nic.name,
+        #             c2_index,
+        #         )
 
     @property
     def port_up_component(self) -> infra.Component:

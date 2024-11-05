@@ -34,7 +34,7 @@ class RackPlaneFabricBuilder(bld.FabricBuilder):
         rack_switch, _ = self._add_fabric_devices(
             host_builder,
             host_count,
-            "rack switch",
+            "RackSwitch",
         )
         self.lowest_device = rack_switch
 
