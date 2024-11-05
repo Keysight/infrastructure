@@ -4,6 +4,7 @@ Features:
 - extended functionality for finding nodes, building inter-package adjacencies,
   calculating paths etc
 """
+
 from typing import List, Literal, Union, Type, Tuple
 from abc import ABC, abstractmethod
 import google.protobuf.json_format
@@ -49,10 +50,6 @@ class DeviceBuilder(ABC):
 
     @property
     @abstractmethod
-    def port_up_component(self) -> infra.Component:
-        pass
-
-    @property
     def port_up_component(self) -> infra.Component:
         pass
 
@@ -167,6 +164,7 @@ class DeviceBuilder(ABC):
                 use_integers_for_enums=False,
             )
         )
+
 
 class HostBuilder(DeviceBuilder):
     def __init__(self):
@@ -382,6 +380,7 @@ class FabricBuilder(ABC):
             f"Inter package link of type {link_type} does not exist in system {self._fabric.name}"
         )
 
+
 class InfraBuilder(ABC):
     def __init__(
         self,
@@ -391,10 +390,7 @@ class InfraBuilder(ABC):
         links: List[Type[infra.Link]] = [],
     ):
         self._infra = infra.Infrastructure(
-            custom_fabric=fabric,
-            hosts=hosts,
-            connections=connections,
-            links={}
+            custom_fabric=fabric, hosts=hosts, connections=connections, links={}
         )
 
         for link in links:
