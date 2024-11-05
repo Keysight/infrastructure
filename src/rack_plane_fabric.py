@@ -23,7 +23,7 @@ class RackPlaneFabricBuilder(bld.FabricBuilder):
     supports connecting to switching via multiple planes
     """
 
-    name: str = "rack plane fabric"
+    name: str = "RackPlaneFabric"
     description: str = "fabric that users multiple planes inside a rack"
     lowest_device: bld.DeviceBuilder = None
 
