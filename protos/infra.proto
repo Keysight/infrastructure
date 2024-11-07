@@ -50,10 +50,14 @@ message Pcie {
 message NvLink {
 }
 
+message Custom {
+}
+
 message Switch {
   oneof type {
     Pcie pcie = 1;
     NvLink nvlink = 2;
+    Custom custom = 3;
   }
 }
 
