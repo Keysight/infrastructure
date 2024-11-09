@@ -6,6 +6,8 @@ syntax = "proto3";
 
 package infra;
 
+import "google/protobuf/any.proto";
+
 enum MemoryType {
   MEM_UNSPECIFIED = 0;
 
@@ -122,7 +124,18 @@ message Link {
   Bandwidth bandwidth = 10;
 }
 
-message ComponentConnection {
+// Device contains collections of components and links and the connections
+// between those components
+message Device {
+  // the name of the device
+  string name = 1;
+
+  // collection of unique components in the device
+  repeated Component components = 3;
+
+  // collection of unique links in the device
+  repeated Link links = 4;
+
   // a list of connections that describe how Components are connected to each
   // other in a single Device
   //
@@ -141,47 +154,7 @@ message ComponentConnection {
   //   nic.0.pcie.cpu.0
   //   npu.0.pcie.nvswitch.0
   //
-  string connection = 1;
-}
-
-// DeviceConnection message describes how Devices are connected to each other
-message DeviceConnection {
-  // format: The following pieces of information each separated by a "."
-  // An * indicates all possible indexes for a component will be mapped
-  // In the case where an * is used for both indexes then the mapping will be
-  // a one-to-one mapping.
-  //
-  // - name = DeviceInstance.name
-  // - index < DeviceInstance.count
-  // - name = Component.name
-  // - index < Component.count
-  // - name = Link.name from one of Infrastructure.inventory.links
-  // - name = DeviceInstance.name
-  // - index < DeviceInstance.count
-  // - name = Component.name
-  // - index < Component.count
-  //
-  // examples:
-  //   host.0.nic.0.100gpbs.racksw.0.nic.0
-  //   host.0.nic.0-8.100gpbs.racksw.0.nic.8-15
-  //
-  string connection = 1;
-}
-
-// Device contains collections of components and links and the connections
-// between those components
-message Device {
-  // the name of the device
-  string name = 1;
-
-  // collection of unique components in the device
-  repeated Component components = 3;
-
-  // collection of unique links in the device
-  repeated Link links = 4;
-
-  // a list of connections that describe how Components are connected
-  repeated ComponentConnection connections = 5;
+  repeated string connections = 5;
 }
 
 message DeviceInstances {
@@ -231,8 +204,38 @@ message Infrastructure {
 
   // A list of the device instances that represents the total number of devices
   // in the infrastructure.
-  repeated DeviceInstances device_instances = 10;
+  repeated DeviceInstances device_instances = 2;
 
-  // A list that describes how device instances are connected
-  repeated DeviceConnection connections = 20;
+  // format: The following pieces of information each separated by a "."
+  // An * indicates all possible indexes for a component will be mapped
+  // In the case where an * is used for both indexes then the mapping will be
+  // a one-to-one mapping.
+  //
+  // - name = DeviceInstance.name
+  // - index < DeviceInstance.count
+  // - name = Component.name
+  // - index < Component.count
+  // - name = Link.name from one of Infrastructure.inventory.links
+  // - name = DeviceInstance.name
+  // - index < DeviceInstance.count
+  // - name = Component.name
+  // - index < Component.count
+  //
+  // examples:
+  //   host.0.nic.0.100gpbs.racksw.0.nic.0
+  //   host.0.nic.0-8.100gpbs.racksw.0.nic.8-15
+  //
+  repeated string connections = 3;
+}
+
+message ValidationRequest {
+  infra.Infrastructure infrastructure = 1;
+}
+
+message ValidationResponse {
+  repeated string invalid_connections = 1;
+}
+
+service InfraService {
+  rpc Validate(ValidationRequest) returns (ValidationResponse);
 }
