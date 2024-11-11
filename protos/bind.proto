@@ -8,7 +8,6 @@ syntax = "proto3";
 package bind;
 
 import "google/protobuf/any.proto";
-import "infra.proto";
 
 message Data {
   // Use this field to provide descriptive information about the message
@@ -53,7 +52,7 @@ message Binding {
   oneof infrastructure_path {
     // the binding is global to the infrastructure and the value provided here
     // is for informational purposes only
-    string global = 1;
+    string infrastructure = 1;
 
     // binding is specific to an Infrastructure.inventory.device.name
     // example: dgx
@@ -101,17 +100,4 @@ message Binding {
 message Bindings {
   // A list of user defined information for specific endpoints
   repeated Binding bindings = 1;
-}
-
-message ValidationRequest {
-  infra.Infrastructure infrastructure = 1;
-  repeated Binding bindings = 2;
-}
-
-message ValidationResponse {
-  repeated Binding invalid_bindings = 1;
-}
-
-service BindService {
-  rpc Validate(ValidationRequest) returns (ValidationResponse);
 }

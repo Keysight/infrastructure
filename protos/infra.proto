@@ -66,10 +66,10 @@ message Switch {
 // Component describes a number of components that share a specific type
 message Component {
   // the name of the component
-  string name = 1;
+  optional string name = 1;
 
   // the number of this type of component
-  uint32 count = 2;
+  optional uint32 count = 2;
 
   // the type of component
   oneof type {
@@ -115,7 +115,7 @@ message Bandwidth {
 // Link describes a link between Components
 message Link {
   // name of the link
-  string name = 1;
+  optional string name = 1;
 
   // type of link
   LinkType type = 2;
@@ -128,21 +128,18 @@ message Link {
 // between those components
 message Device {
   // the name of the device
-  string name = 1;
+  optional string name = 1;
 
   // collection of unique components in the device
-  repeated Component components = 3;
+  map<string, Component> components = 3;
 
   // collection of unique links in the device
-  repeated Link links = 4;
+  map<string, Link> links = 4;
 
   // a list of connections that describe how Components are connected to each
   // other in a single Device
   //
   // format: The following pieces of information each separated by a "."
-  // An * indicates all possible indexes for a component will be mapped
-  // In the case where an * is used for both indexes then the mapping will be
-  // a one-to-one mapping.
   //
   // - name = Component.name
   // - index < Component.count
@@ -153,6 +150,7 @@ message Device {
   // examples:
   //   nic.0.pcie.cpu.0
   //   npu.0.pcie.nvswitch.0
+  //   asic.0.mii.nic.0
   //
   repeated string connections = 5;
 }
@@ -162,15 +160,15 @@ message DeviceInstances {
   // it should be used to categorize the devices
   // for example it can be Dgx1Host, ZionexHost, RackSwitch, PodSwitch,
   // SpineSwitch etc.
-  string name = 1;
+  optional string name = 1;
 
   // the name of an actual device that exists in the
   // Infrastructure.inventory.devices field
   // this allows for a Device to be reused.
-  string device = 2;
+  optional string device = 2;
 
   // the number of instances of the device in the infrastructure under this name
-  uint32 count = 3;
+  optional uint32 count = 3;
 }
 
 // The Inventory message is a collection of unique devices and links present
@@ -179,15 +177,15 @@ message DeviceInstances {
 // DeviceInstance, DeviceLink, ConnectionLink messages
 message Inventory {
   // A collection of all unique types of devices in the infrastructure
-  // Uniquess is determined by the Device.name field.
-  // This list is not an instance list, for eg, you define one DGX1 or ZionEx
-  // device and use the DeviceInstances message to scale up the number of those
-  // devices.
+  // Uniqueness is determined by the Device.name field.
+  // This list is not an instance list instead use the DeviceInstances message
+  // to create an instance of a Device and to scale it to the count present
+  // in your infrastructure.
   map<string, Device> devices = 1;
 
   // A collection of all unique types of links in the infrastructure.
-  // These links can be reused multiple times when creating ComponentConnection
-  // and DeviceConnection messages.
+  // These links can be reused multiple times when creating connections
+  // between devices.
   map<string, Link> links = 2;
 }
 
@@ -207,9 +205,6 @@ message Infrastructure {
   repeated DeviceInstances device_instances = 2;
 
   // format: The following pieces of information each separated by a "."
-  // An * indicates all possible indexes for a component will be mapped
-  // In the case where an * is used for both indexes then the mapping will be
-  // a one-to-one mapping.
   //
   // - name = DeviceInstance.name
   // - index < DeviceInstance.count
@@ -223,19 +218,6 @@ message Infrastructure {
   //
   // examples:
   //   host.0.nic.0.100gpbs.racksw.0.nic.0
-  //   host.0.nic.0-8.100gpbs.racksw.0.nic.8-15
   //
   repeated string connections = 3;
-}
-
-message ValidationRequest {
-  infra.Infrastructure infrastructure = 1;
-}
-
-message ValidationResponse {
-  repeated string invalid_connections = 1;
-}
-
-service InfraService {
-  rpc Validate(ValidationRequest) returns (ValidationResponse);
 }

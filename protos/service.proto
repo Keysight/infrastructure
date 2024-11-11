@@ -1,0 +1,33 @@
+// service.proto
+//
+// Service and rpcs for infrastructure and bindings
+
+syntax = "proto3";
+
+package service;
+
+import "infra.proto";
+import "bind.proto";
+
+message ValidationRequest {
+  infra.Infrastructure infrastructure = 1;
+  bind.Bindings bindingas = 2;
+}
+
+message ValidationError {
+  oneof type {
+    string optional = 1;
+    string oneof = 2;
+    string map = 3;
+    string repeated = 4;
+    string connection = 5;
+  }
+}
+
+message ValidationResponse {
+  repeated ValidationError errors = 1;
+}
+
+service Service {
+  rpc Validate(ValidationRequest) returns (ValidationResponse);
+}
