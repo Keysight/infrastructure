@@ -1,5 +1,7 @@
-from typing import Tuple
+"""Service class that can be used without the need for a grpc service and grpc
+client.
 
+"""
 
 if __package__ is None or __package__ == "":
     from generated.service_pb2 import ValidationRequest, ValidationError, ValidationResponse
@@ -71,7 +73,11 @@ class Service:
             )
 
     def validate(self, request: ValidationRequest):
-        """Validate every connection in the Infrastructure.
+        """Validate Infrastructure and Bindings.
+
+        Enforces the correctness of messages by validating presence, maps,
+        oneof and referential integrity that is implied in device/infrastructure
+        connection paths and binding infrastructure paths.
 
         Every Device in Infrastructure.inventory.devices has connections which
         must have a valid number of pieces separated by a ".".

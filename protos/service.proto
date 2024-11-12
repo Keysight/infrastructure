@@ -11,7 +11,7 @@ import "bind.proto";
 
 message ValidationRequest {
   infra.Infrastructure infrastructure = 1;
-  bind.Bindings bindingas = 2;
+  bind.Bindings bindings = 2;
 }
 
 message ValidationError {
@@ -26,6 +26,7 @@ message ValidationError {
 
 message ValidationResponse {
   repeated ValidationError errors = 1;
+  repeated ValidationError warnings = 2;
 }
 
 service Service {
