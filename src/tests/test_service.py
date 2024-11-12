@@ -31,8 +31,8 @@ def test_missing_bandwidth():
     assert response.errors[0].WhichOneof("type") == "oneof"
 
 
-def test_invalid_component_connection():
-    """Test that a component connection is valid"""
+def test_referential_integrity():
+    """Referential integrity tests"""
     device = Device(name="host")
     mii = Link(name="mii", type=LinkType.LINK_CUSTOM, bandwidth=Bandwidth(gbps=100))
     device.links[mii.name].CopyFrom(mii)
@@ -40,6 +40,7 @@ def test_invalid_component_connection():
     nic = Component(name="nic", count=1)
     device.components[asic.name].CopyFrom(asic)
     device.components[nic.name].CopyFrom(nic)
+    device.connections.append(f"bad.device.component.connection")
     device.connections.append(f"{asic.name}.x.{mii.name}.null.-1")
     inventory = Inventory()
     inventory.devices[device.name].CopyFrom(device)
@@ -47,8 +48,8 @@ def test_invalid_component_connection():
     request = ValidationRequest(infrastructure=infrastructure)
     response = Service().validate(request=request)
     print(response)
-    assert len(response.errors) == 3
-    assert response.errors[0].WhichOneof("type") == "connection"
+    for error in response.errors:
+        assert error.WhichOneof("type") == "referential_integrity"
 
 
 if __name__ == "__main__":

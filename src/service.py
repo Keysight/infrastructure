@@ -38,32 +38,36 @@ class Service:
         except ValueError:
             self._validation_response.errors.append(
                 ValidationError(
-                    connection=f"Connection:{connection} in device:{device.name} is incorrectly formatted"
+                    referential_integrity=f"Infrastructure.devices[{device.name}].connections:[{connection}] is incorrectly formatted"
                 )
             )
 
     def _validate_component(self, device, name, index):
         if name not in device.components:
             self._validation_response.errors.append(
-                ValidationError(connection=f"Component:{name} not present in device:{device.name}")
+                ValidationError(
+                    referential_integrity=f"Infrastructure.devices[{device.name}].components[{name}] does not exist"
+                )
             )
         try:
             index = int(index)
             if index < 0 or index > device.components[name].count - 1:
                 self._validation_response.errors.append(
                     ValidationError(
-                        connection=f"Component:{name} index:{index} must be >= 0 and <{device.components[name].count}"
+                        referential_integrity=f"Component:{name} index:{index} must be >= 0 and <{device.components[name].count}"
                     )
                 )
         except ValueError:
             self._validation_response.errors.append(
-                ValidationError(connection=f"Index:{index} must be a valid integer")
+                ValidationError(referential_integrity=f"Index:{index} must be a valid integer")
             )
 
     def _validate_link_name(self, device, name: str):
         if name not in device.links:
             self._validation_response.errors.append(
-                ValidationError(connection=f"{device.name} does not contain a link:{name}")
+                ValidationError(
+                    referential_integrity=f"Infrastructure.devices[{device.name}].links[{name}] does not exist"
+                )
             )
 
     def _validate_oneof(self, object, name):

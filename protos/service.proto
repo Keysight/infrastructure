@@ -16,17 +16,30 @@ message ValidationRequest {
 
 message ValidationError {
   oneof type {
+    // optional fields must be set to a value
     string optional = 1;
+
+    // oneof fields must have one field set
     string oneof = 2;
+
+    // map keys must match a name field in the object
     string map = 3;
-    string repeated = 4;
-    string connection = 5;
+
+    // referential integrity check failed
+    // the following cases fall under this type:
+    // connection structure is incorrectly formatted
+    // connection pieces are not present in the inventory or device instances
+    // binding infrastructure path is incorrectly formatted
+    // binding infrastructure path pieces are not present in the infrastructure
+    // inventory
+    string referential_integrity = 4;
   }
 }
 
 message ValidationResponse {
   repeated ValidationError errors = 1;
-  repeated ValidationError warnings = 2;
+  repeated string warnings = 2;
+  repeated string info = 3;
 }
 
 service Service {
