@@ -168,6 +168,7 @@ message DeviceInstances {
   optional string device = 2;
 
   // the number of instances of the device in the infrastructure under this name
+  // must be >= 1
   optional uint32 count = 3;
 }
 
@@ -200,9 +201,10 @@ message Infrastructure {
   // The inventory of devices and links present in the infrastructure
   Inventory inventory = 1;
 
-  // A list of the device instances that represents the total number of devices
+  // A map of the device instances that represents the total number of devices
   // in the infrastructure.
-  repeated DeviceInstances device_instances = 2;
+  // Use this to scale out infrastructure
+  map<string, DeviceInstances> device_instances = 2;
 
   // format: The following pieces of information each separated by a "."
   //

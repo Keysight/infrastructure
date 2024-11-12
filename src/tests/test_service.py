@@ -1,7 +1,16 @@
 import pytest
 from service import Service
 from generated.service_pb2 import ValidationRequest
-from generated.infra_pb2 import Infrastructure, Inventory, Device, Link, LinkType, Bandwidth, Component
+from generated.infra_pb2 import (
+    Infrastructure,
+    Inventory,
+    Device,
+    Link,
+    LinkType,
+    Bandwidth,
+    Component,
+    DeviceInstances,
+)
 
 
 def test_valid_device(device):
@@ -33,7 +42,7 @@ def test_missing_bandwidth():
 
 def test_referential_integrity():
     """Referential integrity tests"""
-    device = Device(name="host")
+    device = Device(name="laptop")
     mii = Link(name="mii", type=LinkType.LINK_CUSTOM, bandwidth=Bandwidth(gbps=100))
     device.links[mii.name].CopyFrom(mii)
     asic = Component(name="asic", count=1)
@@ -45,6 +54,8 @@ def test_referential_integrity():
     inventory = Inventory()
     inventory.devices[device.name].CopyFrom(device)
     infrastructure = Infrastructure(inventory=inventory)
+    host = DeviceInstances(name="host", device="laptop", count=4)
+    infrastructure.device_instances[host.name].CopyFrom(host)
     request = ValidationRequest(infrastructure=infrastructure)
     response = Service().validate(request=request)
     print(response)

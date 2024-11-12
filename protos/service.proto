@@ -33,6 +33,9 @@ message ValidationError {
     // binding infrastructure path pieces are not present in the infrastructure
     // inventory
     string referential_integrity = 4;
+
+    // scale up / scale out count
+    string count = 5;
   }
 }
 

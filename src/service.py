@@ -76,6 +76,24 @@ class Service:
                 ValidationError(oneof=f"{object.DESCRIPTOR.name} oneof:{name} must be set")
             )
 
+    def _validate_device_exists(self, name):
+        if name not in self._validation_request.infrastructure.inventory.devices:
+            self._validation_response.errors.append(
+                ValidationError(referential_integrity=f"Infrastructure.devices[{name}] does not exist")
+            )
+
+    def _validate_infrastructure_connection(self, connection):
+        pass
+
+    def _validate_binding_infrastructure_path(self, binding):
+        pass
+
+    def _validate_count(self, count):
+        if count < 1:
+            self._validation_response.errors.append(
+                ValidationError(count=f"Count {count} must be greater than 0")
+            )
+
     def validate(self, request: ValidationRequest):
         """Validate Infrastructure and Bindings.
 
@@ -110,4 +128,16 @@ class Service:
                 self._validate_component_connection(device, connection)
             for link in device.links.values():
                 self._validate_oneof(link.bandwidth, "type")
+        for link in request.infrastructure.inventory.links:
+            self._validate_presence(link, "name")
+        self._validate_map(request.infrastructure.device_instances)
+        for device_instance in request.infrastructure.device_instances.values():
+            self._validate_count(device_instance.count)
+            self._validate_device_exists(device_instance.device)
+        for connection in request.infrastructure.connections:
+            self._validate_infrastructure_connection(connection)
+        if request.bindings is not None:
+            for binding in request.bindings.bindings:
+                self._validate_oneof(binding, "infrastructure_path")
+                self._validate_binding_infrastructure_path(binding)
         return self._validation_response
