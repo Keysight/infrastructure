@@ -1,3 +1,6 @@
+from typing import Tuple
+
+
 if __package__ is None or __package__ == "":
     from generated.service_pb2 import ValidationRequest, ValidationError, ValidationResponse
 else:
@@ -5,8 +8,69 @@ else:
 
 
 class Service:
-    @staticmethod
-    def Validate(request: ValidationRequest):
+    def __init__(self):
+        self._validation_request = None
+        self._validation_response = None
+
+    def _validate_presence(self, object, name):
+        if object.HasField(name) is False:
+            self._validation_response.errors.append(
+                ValidationError(optional=f"{object.DESCRIPTOR.name} {name} field has not been set")
+            )
+
+    def _validate_map(self, map):
+        for key, object in map.items():
+            if object.name != key:
+                self._validation_response.errors.append(
+                    ValidationError(
+                        map=f"{object.DESCRIPTOR.name} name value:{object.name} does not match map key:{key}'"
+                    )
+                )
+
+    def _validate_component_connection(self, device, connection: str):
+        try:
+            c1, c1_idx, link, c2, c2_idx = connection.split(".")
+            self._validate_component(device, c1, c1_idx)
+            self._validate_component(device, c2, c2_idx)
+            self._validate_link_name(device, link)
+        except ValueError:
+            self._validation_response.errors.append(
+                ValidationError(
+                    connection=f"Connection:{connection} in device:{device.name} is incorrectly formatted"
+                )
+            )
+
+    def _validate_component(self, device, name, index):
+        if name not in device.components:
+            self._validation_response.errors.append(
+                ValidationError(connection=f"Component:{name} not present in device:{device.name}")
+            )
+        try:
+            index = int(index)
+            if index < 0 or index > device.components[name].count - 1:
+                self._validation_response.errors.append(
+                    ValidationError(
+                        connection=f"Component:{name} index:{index} must be >= 0 and <{device.components[name].count}"
+                    )
+                )
+        except ValueError:
+            self._validation_response.errors.append(
+                ValidationError(connection=f"Index:{index} must be a valid integer")
+            )
+
+    def _validate_link_name(self, device, name: str):
+        if name not in device.links:
+            self._validation_response.errors.append(
+                ValidationError(connection=f"{device.name} does not contain a link:{name}")
+            )
+
+    def _validate_oneof(self, object, name):
+        if object.WhichOneof(name) is None:
+            self._validation_response.errors.append(
+                ValidationError(oneof=f"{object.DESCRIPTOR.name} oneof:{name} must be set")
+            )
+
+    def validate(self, request: ValidationRequest):
         """Validate every connection in the Infrastructure.
 
         Every Device in Infrastructure.inventory.devices has connections which
@@ -19,32 +83,21 @@ class Service:
         The format of a Device connection is the following:
         "component_name.component_index.link_name.component_name.component_index"
         """
-        errors = []
-        for device_key, device in request.infrastructure.inventory.devices.items():
-            if device.HasField("name") is False:
-                errors.append(ValidationError(optional=f"Device name field has not been set"))
-            if device_key != device.name:
-                errors.append(
-                    ValidationError(
-                        map=f"Device key '{device_key}' does not match Device.name '{device.name}'"
-                    )
-                )
-            for link_key, link in device.links.items():
-                if link_key != link.name:
-                    errors.append(
-                        ValidationError(
-                            map=f"Device '{device.name}' link key '{link_key}' does not match Link.name '{link.name}'"
-                        )
-                    )
-                if link.bandwidth.WhichOneof("type") is None:
-                    errors.append(ValidationError(oneof="Device.links.bandwidth type must be set"))
+        self._validation_request = request
+        self._validation_response = ValidationResponse()
+
+        self._validate_map(request.infrastructure.inventory.devices)
+        for device in request.infrastructure.inventory.devices.values():
+            self._validate_presence(device, "name")
+            self._validate_map(device.links)
+            self._validate_map(device.components)
+            for link in device.links.values():
+                self._validate_presence(link, "name")
+            for component in device.components.values():
+                self._validate_presence(component, "name")
+                self._validate_presence(component, "count")
             for connection in device.connections:
-                try:
-                    src, src_idx, link, dst, dst_idx = connection.split(".")
-                except ValueError:
-                    errors.append(
-                        ValidationError(
-                            connection=f"Component connection in device '{device.name}' is incorrectly formatted"
-                        )
-                    )
-        return ValidationResponse(errors=errors)
+                self._validate_component_connection(device, connection)
+            for link in device.links.values():
+                self._validate_oneof(link.bandwidth, "type")
+        return self._validation_response

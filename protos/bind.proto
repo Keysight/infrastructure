@@ -9,6 +9,8 @@ package bind;
 
 import "google/protobuf/any.proto";
 
+// Data message allows a user to provide data outside of the scope of the
+// infrastructure graph.
 message Data {
   // Use this field to provide descriptive information about the message
   // that is packed into the value field.
