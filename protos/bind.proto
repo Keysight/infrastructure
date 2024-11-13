@@ -2,6 +2,27 @@
 //
 // A data model to describe binding infrastructure paths to external
 // application information.
+//
+// Some examples of binding third party information to infrastructure paths:
+//
+// binding = Binding(
+//     device_instance="pod_switch.0",
+//     data=Data(
+//         name="routing",
+//         value="routing configuration information in a third party format"))
+//
+// binding = Binding(
+//     device_instance_index_component_index="host.0.nic.0",
+//     data=Data(
+//         name="mellanox_config",
+//         value="additional nic configuration information in a third party format"))
+//
+// binding = Binding(
+//     infrastructure="ranks",
+//     data=Data(
+//         name="rank_to_host_map",
+//         value="rank to host mapping in a third party format"))
+//
 
 syntax = "proto3";
 

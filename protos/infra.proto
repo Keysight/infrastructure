@@ -1,6 +1,12 @@
 // infra.proto
 //
 // A data model for describing infrastructure as a graph.
+//
+// NOTES:
+// - use of optional is to allow for a better presence check, all optional
+//  fields must be filled in. For additional details on why optional is being
+//  used review this article https://protobuf.dev/programming-guides/proto3/#field-labels
+//
 
 syntax = "proto3";
 
@@ -131,9 +137,13 @@ message Device {
   optional string name = 1;
 
   // collection of unique components in the device
+  // The key must be the Component.name which is used to guard against duplicates
+  // and will be checked as part of Service.Validation rpc
   map<string, Component> components = 3;
 
   // collection of unique links in the device
+  // The key must be the Link.name which is used to guard against duplicates
+  // and will be checked as part of Service.Validation rpc
   map<string, Link> links = 4;
 
   // a list of connections that describe how Components are connected to each
@@ -187,6 +197,8 @@ message Inventory {
   // A collection of all unique types of links in the infrastructure.
   // These links can be reused multiple times when creating connections
   // between devices.
+  // The key must be the Link.name which is used to guard against duplicates
+  // and will be checked as part of Service.Validation rpc
   map<string, Link> links = 2;
 }
 
@@ -204,6 +216,8 @@ message Infrastructure {
   // A map of the device instances that represents the total number of devices
   // in the infrastructure.
   // Use this to scale out infrastructure
+  // The must be the DeviceInstances.name which is used to guard against duplicates
+  // and will be checked as part of Service.Validation rpc
   map<string, DeviceInstances> device_instances = 2;
 
   // format: The following pieces of information each separated by a "."
