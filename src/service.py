@@ -82,16 +82,19 @@ class Service:
                 ValidationError(referential_integrity=f"Infrastructure.devices[{name}] does not exist")
             )
 
-    def _validate_infrastructure_connection(self, connection):
+    def _validate_device_connection(self, connection):
         pass
 
     def _validate_binding_infrastructure_path(self, binding):
         pass
 
-    def _validate_count(self, count):
-        if count < 1:
+    def _validate_count(self, object):
+        """Validates that the count of an object is greater than 0"""
+        if object.count < 1:
             self._validation_response.errors.append(
-                ValidationError(count=f"Count {count} must be greater than 0")
+                ValidationError(
+                    count=f"{object.DESCRIPTOR.name}.count == {object.count} and must be greater than 0"
+                )
             )
 
     def validate(self, request: ValidationRequest):
@@ -124,6 +127,7 @@ class Service:
             for component in device.components.values():
                 self._validate_presence(component, "name")
                 self._validate_presence(component, "count")
+                self._validate_count(component)
             for connection in device.connections:
                 self._validate_component_connection(device, connection)
             for link in device.links.values():
@@ -132,10 +136,10 @@ class Service:
             self._validate_presence(link, "name")
         self._validate_map(request.infrastructure.device_instances)
         for device_instance in request.infrastructure.device_instances.values():
-            self._validate_count(device_instance.count)
+            self._validate_count(device_instance)
             self._validate_device_exists(device_instance.device)
         for connection in request.infrastructure.connections:
-            self._validate_infrastructure_connection(connection)
+            self._validate_device_connection(connection)
         if request.bindings is not None:
             for binding in request.bindings.bindings:
                 self._validate_oneof(binding, "infrastructure_path")
