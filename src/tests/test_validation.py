@@ -13,9 +13,9 @@ from keysight_chakra.generated.infra_pb2 import (
 )
 
 
-def test_validate_device(service, host):
+def test_validate_device(validation, host):
     """Test that a device is valid"""
-    response = service.validate(
+    response = validation.validate(
         request=ValidationRequest(
             infrastructure=Infrastructure(
                 inventory=Inventory(
@@ -29,7 +29,7 @@ def test_validate_device(service, host):
     assert len(response.errors) == 0
 
 
-def test_missing_bandwidth(service):
+def test_missing_bandwidth(validation):
     """Test that a device is missing the bandwidth from a link"""
     device = Device(name="host")
     mii = Link(name="mii", type=LinkType.LINK_CUSTOM)
@@ -38,13 +38,13 @@ def test_missing_bandwidth(service):
     inventory.devices[device.name].CopyFrom(device)
     infrastructure = Infrastructure(inventory=inventory)
     request = ValidationRequest(infrastructure=infrastructure)
-    response = service.validate(request=request)
+    response = validation.validate(request=request)
     print(response)
     assert len(response.errors) == 1
     assert response.errors[0].WhichOneof("type") == "oneof"
 
 
-def test_referential_integrity(service):
+def test_referential_integrity(validation):
     """Referential integrity tests"""
     device = Device(name="laptop")
     mii = Link(name="mii", type=LinkType.LINK_CUSTOM, bandwidth=Bandwidth(gbps=100))
@@ -61,7 +61,7 @@ def test_referential_integrity(service):
     host = DeviceInstances(name="host", device="laptop", count=4)
     infrastructure.device_instances[host.name].CopyFrom(host)
     request = ValidationRequest(infrastructure=infrastructure)
-    response = service.validate(request=request)
+    response = validation.validate(request=request)
     print(response)
     for error in response.errors:
         assert error.WhichOneof("type") == "referential_integrity"

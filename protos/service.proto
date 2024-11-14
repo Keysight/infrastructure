@@ -45,6 +45,7 @@ message ValidationResponse {
   repeated string info = 3;
 }
 
-service Service {
+service InfraService {
+  // Validate rpc validates both infra and binding messages
   rpc Validate(ValidationRequest) returns (ValidationResponse);
 }

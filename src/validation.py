@@ -3,24 +3,31 @@ client.
 
 """
 
+from typing import Annotated
+from google.protobuf.message import Message
+
 if __package__ is None or __package__ == "":
     from generated.service_pb2 import ValidationRequest, ValidationError, ValidationResponse
+    from generated.infra_pb2 import Device
+    from generated.bind_pb2 import Binding
 else:
     from .generated.service_pb2 import ValidationRequest, ValidationError, ValidationResponse
+    from .generated.infra_pb2 import Device
+    from .generated.bind_pb2 import Binding
 
 
-class Service:
+class Validation:
     def __init__(self):
         self._validation_request = None
         self._validation_response = None
 
-    def _validate_presence(self, object, name):
+    def _validate_presence(self, object: Message, name: str):
         if object.HasField(name) is False:
             self._validation_response.errors.append(
                 ValidationError(optional=f"{object.DESCRIPTOR.name} {name} field has not been set")
             )
 
-    def _validate_map(self, map):
+    def _validate_map(self, map: Annotated[object, "google protobuf MessageMapContainer"]):
         for key, object in map.items():
             if object.name != key:
                 self._validation_response.errors.append(
@@ -29,7 +36,7 @@ class Service:
                     )
                 )
 
-    def _validate_component_connection(self, device, connection: str):
+    def _validate_component_connection(self, device: Device, connection: str):
         try:
             c1, c1_idx, link, c2, c2_idx = connection.split(".")
             self._validate_component(device, c1, c1_idx)
@@ -42,7 +49,7 @@ class Service:
                 )
             )
 
-    def _validate_component(self, device, name, index):
+    def _validate_component(self, device: Device, name: str, index: int):
         if name not in device.components:
             self._validation_response.errors.append(
                 ValidationError(
@@ -62,7 +69,7 @@ class Service:
                 ValidationError(referential_integrity=f"Index:{index} must be a valid integer")
             )
 
-    def _validate_link_name(self, device, name: str):
+    def _validate_link_name(self, device: Device, name: str):
         if name not in device.links:
             self._validation_response.errors.append(
                 ValidationError(
@@ -70,25 +77,25 @@ class Service:
                 )
             )
 
-    def _validate_oneof(self, object, name):
+    def _validate_oneof(self, object: Message, name: str):
         if object.WhichOneof(name) is None:
             self._validation_response.errors.append(
                 ValidationError(oneof=f"{object.DESCRIPTOR.name} oneof:{name} must be set")
             )
 
-    def _validate_device_exists(self, name):
+    def _validate_device_exists(self, name: str):
         if name not in self._validation_request.infrastructure.inventory.devices:
             self._validation_response.errors.append(
                 ValidationError(referential_integrity=f"Infrastructure.devices[{name}] does not exist")
             )
 
-    def _validate_device_connection(self, connection):
+    def _validate_device_connection(self, connection: str):
         pass
 
-    def _validate_binding_infrastructure_path(self, binding):
+    def _validate_binding_infrastructure_path(self, binding: Binding):
         pass
 
-    def _validate_count(self, object):
+    def _validate_count(self, object: Message):
         """Validates that the count of an object is greater than 0"""
         if object.count < 1:
             self._validation_response.errors.append(
