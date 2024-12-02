@@ -64,7 +64,7 @@ message Custom {
 message Switch {
   oneof type {
     Pcie pcie = 1;
-    NvLink nvlink = 2;
+    NvLink nvswitch = 2;
     Custom custom = 3;
   }
 }
@@ -96,17 +96,6 @@ message Component {
   }
 }
 
-enum LinkType {
-  LINK_UNSPECIFIED = 0;
-  LINK_CUSTOM = 1;
-  LINK_ETHERNET = 2;
-  LINK_PCIE = 3;
-  LINK_NVLINK = 4;
-  LINK_QPI = 5;
-  LINK_UPI = 6;
-  LINK_INFINIBAND = 7;
-}
-
 message Bandwidth {
   oneof type {
     // gigabits per second
@@ -124,7 +113,7 @@ message Link {
   optional string name = 1;
 
   // type of link
-  LinkType type = 2;
+  optional string description = 2;
 
   // Describes the bandwidth of the link
   Bandwidth bandwidth = 10;

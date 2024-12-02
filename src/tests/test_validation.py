@@ -6,7 +6,6 @@ from keysight_chakra.generated.infra_pb2 import (
     Inventory,
     Device,
     Link,
-    LinkType,
     Bandwidth,
     Component,
     DeviceInstances,
@@ -32,7 +31,7 @@ def test_validate_device(validation, host):
 def test_missing_bandwidth(validation):
     """Test that a device is missing the bandwidth from a link"""
     device = Device(name="host")
-    mii = Link(name="mii", type=LinkType.LINK_CUSTOM)
+    mii = Link(name="mii")
     device.links[mii.name].CopyFrom(mii)
     inventory = Inventory()
     inventory.devices[device.name].CopyFrom(device)
@@ -47,7 +46,7 @@ def test_missing_bandwidth(validation):
 def test_referential_integrity(validation):
     """Referential integrity tests"""
     device = Device(name="laptop")
-    mii = Link(name="mii", type=LinkType.LINK_CUSTOM, bandwidth=Bandwidth(gbps=100))
+    mii = Link(name="mii", bandwidth=Bandwidth(gbps=100))
     device.links[mii.name].CopyFrom(mii)
     asic = Component(name="asic", count=1)
     nic = Component(name="nic", count=1)
