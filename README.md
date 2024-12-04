@@ -144,30 +144,45 @@ Use the Bindings message in bind.proto to extend the logical infrastructure by a
 
 This is done by binding logical endpoints to any data such as:
 
-### type meta data
+### Global Metadata
 
 ```yaml
 bindings:
-  - infrastructure:
+  - targets:
+      - infrasrtucture: Metadata
     data:
       name: DeviceTypes
       description: Key value metadata map of a user specified device type to an infrastructure inventory device name
       value:
-      - @type: type.googleapis.com/google.protobuf.Struct
-      - device_types:
-        - key: host
-          value: dgxa100
-        - key: switch
-          value: th3
+        - @type: type.googleapis.com/google.protobuf.Struct
+        - device_types:
+          - key: host
+            value: dgxa100
+          - key: switch
+            value: th3
 ```
 
-### physical configuration
+### Physical Configuration
 
 ```yaml
-
+bindings:
+  - targets:
+      - device_instance: racksw
+      - device_instance_index: podsw.0
+      - device_instance: spinesw
+    data:
+      name: OpenConfigInterface
+      description: Switch configuration
+      value:
+        - @type: type.googleapis.com/google.protobuf.Struct
+        - config:
+          - type: ...
+          - mtu: ...
+          - loopback-mode: ...
+          - enabled: ...
 ```
 
-### application
+### Application Configuration
 
 ```yaml
 

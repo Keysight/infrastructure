@@ -59,18 +59,8 @@ message Data {
   google.protobuf.Any value = 2;
 }
 
-// The Binding message offers the option of binding different types of logical
-// Infrastructure endpoints to custom attributes.
-//
-// The format allows for attributes to be applied at a macro level such as
-// all devices or at a micro level such as an individual component in a
-// specific device instance.
-//
-// The custom attributes allows for user defined information including but not
-// limited to configuration, location, identification.
-// Multiple custom attributes can be applied to a single binding value
-// packed into an Any type.
-message Binding {
+// The BindTarget message
+message BindTarget {
   // The location of infrastructure that matches the binding type format
   oneof infrastructure_path {
     // the binding is global to the infrastructure and the value provided here
@@ -115,6 +105,18 @@ message Binding {
     // example: host.1.npu.0
     string device_instance_index_component_index = 8;
   }
+}
+
+// The Binding message offers the option of binding different types of logical
+// Infrastructure endpoints to any type of user defined data.
+//
+// The format allows for data to be applied at a macro level such as
+// all devices or at a micro level such as an individual component in a
+// specific device instance.
+message Binding {
+  // targets is a list of BindTarget messages that share the same
+  // user defined information stored in the data field
+  repeated BindTarget targets = 1;
 
   // the data field accomodates any type of user defined information
   Data data = 100;
