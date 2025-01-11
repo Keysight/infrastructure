@@ -6,7 +6,7 @@ env: ## install env requirements
 	pip install -r requirements.txt
 
 .PHONY: build
-GENERATED_DIR := ./src/generated
+GENERATED_DIR := ./keysight_chakra/generated
 build: ## compile all .proto files and generate artifacts
 	curl -L -o ./protos/et_def.proto https://raw.githubusercontent.com/mlcommons/chakra/main/schema/protobuf/et_def.proto
 	rm -rf $(GENERATED_DIR) || true
@@ -23,6 +23,6 @@ build: ## compile all .proto files and generate artifacts
 
 .PHONY: test
 test: build ## run sanity tests on the distribution
-	python3 -m pytest -s src/tests
+	python3 -m pytest -s keysight_chakra/tests
 
 

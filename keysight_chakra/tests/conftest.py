@@ -6,7 +6,7 @@ for directory_piece in ["..", "generated", "tests"]:
 
 import pytest
 from keysight_chakra.generated.infra_pb2 import Device, Component, Link, Bandwidth, Npu, Nic
-from validation import Validation
+from keysight_chakra.validation import Validation
 
 
 @pytest.fixture

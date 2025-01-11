@@ -5,15 +5,9 @@ client.
 
 from typing import Annotated
 from google.protobuf.message import Message
-
-if __package__ is None or __package__ == "":
-    from generated.service_pb2 import ValidationRequest, ValidationError, ValidationResponse
-    from generated.infra_pb2 import Device
-    from generated.bind_pb2 import Binding
-else:
-    from .generated.service_pb2 import ValidationRequest, ValidationError, ValidationResponse
-    from .generated.infra_pb2 import Device
-    from .generated.bind_pb2 import Binding
+from generated.service_pb2 import ValidationRequest, ValidationError, ValidationResponse
+from generated.infra_pb2 import Device
+from generated.bind_pb2 import Binding
 
 
 class Validation:
