@@ -15,9 +15,9 @@ with open("./VERSION", "rt") as fp:
 # List the packages and their dir mapping:
 # "install_destination_package_path": "source_dir_path"
 package_dir_map = {
-    f"{package_base}": "./src",
-    f"{package_base}/generated": "./src/generated",
-    f"{package_base}/tests": "./src/tests",
+    f"{package_base}": "./keysight_chakra",
+    f"{package_base}/generated": "./keysight_chakra/generated",
+    f"{package_base}/tests": "./keysight_chakra/tests",
 }
 
 requires = [

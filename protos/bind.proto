@@ -1,0 +1,128 @@
+// bind.proto
+//
+// A data model to describe binding infrastructure paths to external
+// application information.
+//
+// Some examples of binding third party information to infrastructure paths:
+//
+// binding = Binding(
+//     device_instance="pod_switch.0",
+//     data=Data(
+//         name="routing",
+//         value="routing configuration information in a third party format"))
+//
+// binding = Binding(
+//     device_instance_index_component_index="host.0.nic.0",
+//     data=Data(
+//         name="mellanox_config",
+//         value="additional nic configuration information in a third party format"))
+//
+// binding = Binding(
+//     infrastructure="ranks",
+//     data=Data(
+//         name="rank_to_host_map",
+//         value="rank to host mapping in a third party format"))
+//
+
+syntax = "proto3";
+
+package bind;
+
+import "google/protobuf/any.proto";
+
+// Data message allows a user to provide data outside of the scope of the
+// infrastructure graph.
+message Data {
+  // Use this field to provide descriptive information about the message
+  // that is packed into the value field.
+  string name = 1;
+
+  // The value field can be used to store external information outside the
+  // scope of the infra.proto messages.
+  //
+  // In addition to custom messages any wellknown type can be set into an
+  // Any message. See the following reference for details:
+  // https://protobuf.dev/reference/protobuf/google.protobuf/
+  //
+  // The following is how to serialize a proto message into the Data.value field
+  //
+  // custom_msg = CustomMessage()
+  // any_message = Any()
+  // any_message.Pack(custom_msg)
+  // data = Data(name="a custom message", value=custom_msg)
+  //
+  // The following is how to deserialize the contents of Data.value
+  //
+  // custom_msg = CustomMessage()
+  // if data.value.Is(CustomMessage.DESCRIPTOR):
+  //   data.value.Unpack(custom_msg)
+  google.protobuf.Any value = 2;
+}
+
+// The BindTarget message
+message BindTarget {
+  // The location of infrastructure that matches the binding type format
+  oneof infrastructure_path {
+    // the binding is global to the infrastructure and the value provided here
+    // is for informational purposes only
+    string infrastructure = 1;
+
+    // binding is specific to an Infrastructure.inventory.device.name
+    // example: dgx
+    string device = 2;
+
+    // binding is specific to an Infrastructure.inventory.device.name
+    // example: dgx.npu
+    string device_component = 3;
+
+    // binding is specific to an Infrastructure.inventory.device.name
+    // example: dgx.npu.0
+    string device_component_index = 4;
+
+    // binding is specific to an instance of
+    // Infrastructure.device_instances.name
+    // example: host
+    string device_instance = 5;
+
+    // binding is specific to an instance of
+    // Infrastructure.device_instances.name
+    // and an index < Infrastructure.device_instances.count
+    // example: host.1
+    string device_instance_index = 6;
+
+    // binding is specific to an instance of
+    // Infrastructure.device_instances.name
+    // and an index < Infrastructure.device_instances.count
+    // and an Infrastructure.inventory.device.component.name
+    // example: host.1.npu
+    string device_instance_index_component = 7;
+
+    // binding is specific to an instance of
+    // Infrastructure.device_instances.name
+    // and an index < Infrastructure.device_instances.count
+    // and an Infrastructure.inventory.device.component.name
+    // and an index < Infrastructure.inventory.device.component.name.index
+    // example: host.1.npu.0
+    string device_instance_index_component_index = 8;
+  }
+}
+
+// The Binding message offers the option of binding different types of logical
+// Infrastructure endpoints to any type of user defined data.
+//
+// The format allows for data to be applied at a macro level such as
+// all devices or at a micro level such as an individual component in a
+// specific device instance.
+message Binding {
+  // targets is a list of BindTarget messages that share the same
+  // user defined information stored in the data field
+  repeated BindTarget targets = 1;
+
+  // the data field accomodates any type of user defined information
+  Data data = 100;
+}
+
+message Bindings {
+  // A list of user defined information for specific endpoints
+  repeated Binding bindings = 1;
+}

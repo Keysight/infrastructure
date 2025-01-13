@@ -1,0 +1,51 @@
+// service.proto
+//
+// Service and rpcs for infrastructure and bindings
+
+syntax = "proto3";
+
+package service;
+
+import "infra.proto";
+import "bind.proto";
+
+message ValidationRequest {
+  infra.Infrastructure infrastructure = 1;
+  bind.Bindings bindings = 2;
+}
+
+message ValidationError {
+  oneof type {
+    // optional fields must be set to a value
+    string optional = 1;
+
+    // oneof fields must have one field set
+    string oneof = 2;
+
+    // map keys must match a name field in the object
+    string map = 3;
+
+    // referential integrity check failed
+    // the following cases fall under this type:
+    // connection structure is incorrectly formatted
+    // connection pieces are not present in the inventory or device instances
+    // binding infrastructure path is incorrectly formatted
+    // binding infrastructure path pieces are not present in the infrastructure
+    // inventory
+    string referential_integrity = 4;
+
+    // scale up / scale out count
+    string count = 5;
+  }
+}
+
+message ValidationResponse {
+  repeated ValidationError errors = 1;
+  repeated string warnings = 2;
+  repeated string info = 3;
+}
+
+service InfraService {
+  // Validate rpc validates both infra and binding messages
+  rpc Validate(ValidationRequest) returns (ValidationResponse);
+}

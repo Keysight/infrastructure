@@ -1,18 +1,28 @@
 // infra.proto
-// An abstract data model for describing static infrastructure as a graph.
+//
+// A data model for describing infrastructure as a graph.
+//
+// NOTES:
+// - use of optional is to allow for a better presence check, all optional
+//  fields must be filled in. For additional details on why optional is being
+//  used review this article https://protobuf.dev/programming-guides/proto3/#field-labels
+//
 
 syntax = "proto3";
 
 package infra;
 
-import "et_def.proto";
+import "google/protobuf/any.proto";
 
 enum MemoryType {
   MEM_UNSPECIFIED = 0;
+
   // random access memory
   MEM_RAM = 1;
+
   // high bandwidth memory interface for 3D stacked sync dynamic random-access memory
   MEM_HBM = 2;
+
   // memory that uses compute express link interconnect to the cpu
   MEM_CXL = 3;
 }
@@ -54,7 +64,7 @@ message Custom {
 message Switch {
   oneof type {
     Pcie pcie = 1;
-    NvLink nvlink = 2;
+    NvLink nvswitch = 2;
     Custom custom = 3;
   }
 }
@@ -62,36 +72,28 @@ message Switch {
 // Component describes a number of components that share a specific type
 message Component {
   // the name of the component
-  string name = 1;
+  optional string name = 1;
+
   // the number of this type of component
-  uint32 count = 2;
+  optional uint32 count = 2;
+
   // the type of component
   oneof type {
     // a custom component that does not fall into one of the other messages within this type
     CustomComponent custom = 10;
+
     // cpu component configuration
     Cpu cpu = 11;
+
     // npu component configuration
     Npu npu = 12;
+
     // nic component configuration
     Nic nic = 13;
+
     // switch component configuration
     Switch switch = 14;
   }
-  // a list of custom attributes to allow for the specification of information
-  // not provided by the current message structure
-  repeated ChakraProtoMsg.AttributeProto attributes = 100;
-}
-
-enum LinkType {
-  LINK_UNSPECIFIED = 0;
-  LINK_CUSTOM = 1;
-  LINK_ETHERNET = 2;
-  LINK_PCIE = 3;
-  LINK_NVLINK = 4;
-  LINK_QPI = 5;
-  LINK_UPI = 6;
-  LINK_INFINIBAND = 7;
 }
 
 message Bandwidth {
@@ -105,170 +107,122 @@ message Bandwidth {
   }
 }
 
-message Latency {
-  oneof type {
-    // milliseond latency
-    uint64 ms = 1;
-    // microsecond latency
-    uint64 us = 2;
-    // nanonsecond latency
-    uint64 ns = 3;
-  }
-}
-
 // Link describes a link between Components
 message Link {
   // name of the link
-  string name = 1;
+  optional string name = 1;
+
   // type of link
-  LinkType type = 2;
-  // NOTE: the following fields are currently being discussed
-  // and are subject to change
+  optional string description = 2;
+
+  // Describes the bandwidth of the link
   Bandwidth bandwidth = 10;
-  Latency latency = 11;
-  // a list of custom attributes to allow for the specification of information
-  // not provided by the current message structure
-  repeated ChakraProtoMsg.AttributeProto attributes = 100;
-}
-
-// ComponentLink describes the link of specific components inside a device
-message ComponentLink {
-  // Device.components.name
-  string c1 = 1;
-  // 0 based index < Device.components.count
-  uint32 c1_index = 2;
-  // Link.name
-  string link = 3;
-  // Device.components.name
-  string c2 = 4;
-  // 0 based index < Device.components.count
-  uint32 c2_index = 5;
-}
-
-message ComponentConnection {
-  oneof type {
-    // link is the explicit description of the connection of
-    // two unique Components in a Device
-    ComponentLink link = 1;
-    // string is a short form of the ComponentLink message which is a
-    // a concatentation of the ComponentLink field values separated by a comma
-    // at the link name
-    // <c1>.<c1_index>,<link>,<c2>.<c2_index>
-    // e.g., cpu.0,pcie,nic.0
-    string string = 2;
-  }
 }
 
 // Device contains collections of components and links and the connections
 // between those components
 message Device {
   // the name of the device
-  string name = 1;
+  optional string name = 1;
+
   // collection of unique components in the device
+  // The key must be the Component.name which is used to guard against duplicates
+  // and will be checked as part of Service.Validation rpc
   map<string, Component> components = 3;
+
   // collection of unique links in the device
+  // The key must be the Link.name which is used to guard against duplicates
+  // and will be checked as part of Service.Validation rpc
   map<string, Link> links = 4;
+
   // a list of connections that describe how Components are connected to each
-  // other in the Device
-  repeated ComponentConnection connections = 5;
+  // other in a single Device
+  //
+  // format: The following pieces of information each separated by a "."
+  //
+  // - name = Component.name
+  // - index < Component.count
+  // - name = Link.name from one of Component.links
+  // - name = Component.name
+  // - index < Component.count
+  //
+  // examples:
+  //   nic.0.pcie.cpu.0
+  //   npu.0.pcie.nvswitch.0
+  //   asic.0.mii.nic.0
+  //
+  repeated string connections = 5;
 }
 
-// DeviceLink describes the connection between components of different devices
-// A different device can be the same name of a device but the index must not
-// be the same
-message DeviceLink {
-  // an Infrastructure.devices[name]
-  string d1 = 1;
-  // 0 based index < Infrastructure.devices[d1].count
-  uint32 d1_index = 2;
-  // an Infrastructure.devices[d1].components[name]
-  string c1 = 3;
-  // 0 based index < Infrastructure.devices[d1].components[c1].count
-  uint32 c1_index = 4;
-  // Infrastructure.links[name]
-  string link = 5;
-  // an Infrastructure.devices[name] != d1
-  string d2 = 6;
-  // 0 based index < Infrastructure.devices[d2].count
-  uint32 d2_index = 7;
-  // a Infrastructure.devices[d2].components[name]
-  string c2 = 8;
-  // a 0 based index < Infrastructure.devices[d2].components[c2].count
-  uint32 c2_index = 9;
+message DeviceInstances {
+  // the name of the device instances in the topology
+  // it should be used to categorize the devices
+  // for example it can be Dgx1Host, ZionexHost, RackSwitch, PodSwitch,
+  // SpineSwitch etc.
+  optional string name = 1;
+
+  // the name of an actual device that exists in the
+  // Infrastructure.inventory.devices field
+  // this allows for a Device to be reused.
+  optional string device = 2;
+
+  // the number of instances of the device in the infrastructure under this name
+  // must be >= 1
+  optional uint32 count = 3;
 }
 
-message DeviceConnection {
-  oneof type {
-    // connection detail is an explicit way of describing a connection between
-    // two unique Devices
-    DeviceLink link = 1;
-    // connection is a short form of the DeviceLink message which is a
-    // a concatentation of the DeviceLink field values separated by a comma
-    // <d1>.<d1_index><c1.<c1_index>,<link>,<d2>.<d2_index>.<c2>.<c2_index>
-    // e.g., host.0.nic.0,eth,rack.0.nic.0
-    string string = 2;
-  }
+// The Inventory message is a collection of unique devices and links present
+// in the infrastructure.
+// The devices and links in the inventory are meant to be reused in
+// DeviceInstance, DeviceLink, ConnectionLink messages
+message Inventory {
+  // A collection of all unique types of devices in the infrastructure
+  // Uniqueness is determined by the Device.name field.
+  // This list is not an instance list instead use the DeviceInstances message
+  // to create an instance of a Device and to scale it to the count present
+  // in your infrastructure.
+  map<string, Device> devices = 1;
+
+  // A collection of all unique types of links in the infrastructure.
+  // These links can be reused multiple times when creating connections
+  // between devices.
+  // The key must be the Link.name which is used to guard against duplicates
+  // and will be checked as part of Service.Validation rpc
+  map<string, Link> links = 2;
 }
 
-// DeviceCount allows for specifying multiple instances of a Device in the
-// Infrastructure message
-message DeviceCount {
-  // The number of these devices in the infrastructure
-  uint32 count = 1;
-  // the device definition
-  Device device = 2;
-}
-
-// CustomFabric is an abstract collection of messages used to describe a fabric
-// consisting of a collection of devices, links and connections between those devices
-message CustomFabric {
-  // the name of the custom infrastructure
-  string name = 1;
-  // a map of all the different Device messages and their counts that exist
-  // in the custom fabric
-  map<string, DeviceCount> devices = 2;
-  // a map of all the different links that exist in the custom fabric
-  map<string, Link> links = 3;
-  // a list of the DeviceConnection messages that describe how Devices are
-  // connected to each other in the custom fabric
-  repeated DeviceConnection connections = 4;
-}
-
-// ClosFabric is a structured collection of host/rack/pod/spine devices,
-// links and connections between those devices
-message ClosFabric {
-  // describes the lowest tier of switches
-  DeviceCount rack_switches = 2;
-  // describes the middle tier of switches
-  DeviceCount pod_switches = 3;
-  // describes the highest tier of switches
-  DeviceCount spine_switches = 4;
-  // describes the links used in the connections field
-  map<string, Link> links = 5;
-  // describes the connections between the switch devices
-  repeated DeviceConnection connections = 6;
-}
-
-//describes a collection of host objects
-message Hosts {
-  // definition of the host devices
-  DeviceCount devices = 1;
-}
-
-// Infrastructure is a combination of host devices, fabric devices,
-// and the connections between them
+// The Infrastructure message establishes an inventory of devices and links,
+// instances of the inventory, connectivity between those instances and
+// any custom user information about devices, components, links and instances.
+//
+// The Infrastructure can be as small as a single host connected to a switch or
+// as large as multiple data centers each with different fabrics that are
+// interconnected.
 message Infrastructure {
-  // describes the collection of host objects
-  Hosts hosts = 1;
+  // The inventory of devices and links present in the infrastructure
+  Inventory inventory = 1;
 
-  // describes the fabric and the devices in it
-  oneof fabricType {
-    CustomFabric custom_fabric = 2;
-    ClosFabric clos_fabric = 3;
-  }
+  // A map of the device instances that represents the total number of devices
+  // in the infrastructure.
+  // Use this to scale out infrastructure
+  // The must be the DeviceInstances.name which is used to guard against duplicates
+  // and will be checked as part of Service.Validation rpc
+  map<string, DeviceInstances> device_instances = 2;
 
-  //describes the links used to connect the host devices and the fabric
-  map<string, Link> links = 4;
-  // describes the connections between the host devices and the fabric
-  repeated DeviceConnection connections = 5;
+  // format: The following pieces of information each separated by a "."
+  //
+  // - name = DeviceInstance.name
+  // - index < DeviceInstance.count
+  // - name = Component.name
+  // - index < Component.count
+  // - name = Link.name from one of Infrastructure.inventory.links
+  // - name = DeviceInstance.name
+  // - index < DeviceInstance.count
+  // - name = Component.name
+  // - index < Component.count
+  //
+  // examples:
+  //   host.0.nic.0.100gpbs.racksw.0.nic.0
+  //
+  repeated string connections = 3;
 }

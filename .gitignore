@@ -2,12 +2,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 .ipynb_checkpoints
-src/tests/*.html
-src/tests/*.yml
+keysight_chakra/tests/*.html
+keysight_chakra/tests/*.yml
 .yml
 build
 dist
 .pytest_cache
 *.egg-info
-src/generated
-src/tests/generated_artifacts
+keysight_chakra/generated
+keysight_chakra/tests/generated_artifacts
