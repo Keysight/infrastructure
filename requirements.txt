@@ -1,7 +1,8 @@
-pytest
-pyyaml
-protobuf
+pytest==7.4.4
 grpcio
-grpcio-tools
+pyyaml
+protobuf==5.28.3
+grpcio==1.67.1
+grpcio-tools==1.67.1
 wheel
 scikit-learn
