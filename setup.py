@@ -31,7 +31,7 @@ setuptools.setup(
     python_requires=">=3.8",
     author="Keysight",
     author_email=f"support.ix@keysight.com",
-    url="https://keysight.com",
+    url="https://github.com/Keysight/infrastructure",
     packages=set(package_dir_map.keys()),
     package_dir=package_dir_map,
     include_package_data=True,

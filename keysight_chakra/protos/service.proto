@@ -1,17 +1,17 @@
 // service.proto
 //
-// Service and rpcs for infrastructure and bindings
+// Service and rpcs for infrastructure and annotations
 
 syntax = "proto3";
 
 package service;
 
 import "infra.proto";
-import "bind.proto";
+import "annotate.proto";
 
 message ValidationRequest {
   infra.Infrastructure infrastructure = 1;
-  bind.Bindings bindings = 2;
+  repeated annotate.Annotation annotations = 2;
 }
 
 message ValidationError {
@@ -29,9 +29,9 @@ message ValidationError {
     // the following cases fall under this type:
     // connection structure is incorrectly formatted
     // connection pieces are not present in the inventory or device instances
-    // binding infrastructure path is incorrectly formatted
-    // binding infrastructure path pieces are not present in the infrastructure
-    // inventory
+    // annotation infrastructure path is incorrectly formatted
+    // annotation infrastructure path pieces are not present in the
+    // infrastructure inventory
     string referential_integrity = 4;
 
     // scale up / scale out count
@@ -46,6 +46,6 @@ message ValidationResponse {
 }
 
 service InfraService {
-  // Validate rpc validates both infra and binding messages
+  // Validate rpc validates both infra and annotation messages
   rpc Validate(ValidationRequest) returns (ValidationResponse);
 }

@@ -7,7 +7,7 @@ from typing import Annotated
 from google.protobuf.message import Message
 from generated.service_pb2 import ValidationRequest, ValidationError, ValidationResponse
 from generated.infra_pb2 import Device
-from generated.bind_pb2 import Binding
+from generated.annotate_pb2 import Annotation
 
 
 class Validation:
@@ -86,7 +86,7 @@ class Validation:
     def _validate_device_connection(self, connection: str):
         pass
 
-    def _validate_binding_infrastructure_path(self, binding: Binding):
+    def _validate_target_path(self, annotation: Annotation):
         pass
 
     def _validate_count(self, object: Message):
@@ -141,8 +141,8 @@ class Validation:
             self._validate_device_exists(device_instance.device)
         for connection in request.infrastructure.connections:
             self._validate_device_connection(connection)
-        if request.bindings is not None:
-            for binding in request.bindings.bindings:
-                self._validate_oneof(binding, "infrastructure_path")
-                self._validate_binding_infrastructure_path(binding)
+        if request.annotations is not None:
+            for annotation in request.annotations:
+                self._validate_oneof(annotation, "infrastructure_path")
+                self._validate_target_path(annotation)
         return self._validation_response
