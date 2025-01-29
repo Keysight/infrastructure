@@ -8,15 +8,15 @@ env: ## install env requirements
 .PHONY: build
 GENERATED_DIR := ./keysight_chakra/generated
 build: ## compile all .proto files and generate artifacts
-	curl -L -o ./protos/et_def.proto https://raw.githubusercontent.com/mlcommons/chakra/main/schema/protobuf/et_def.proto
+	curl -L -o ./keysight_chakra/protos/et_def.proto https://raw.githubusercontent.com/mlcommons/chakra/main/schema/protobuf/et_def.proto
 	rm -rf $(GENERATED_DIR) || true
 	mkdir -p $(GENERATED_DIR)
 	python3 -m grpc_tools.protoc \
-		--proto_path=./protos \
+		--proto_path=./keysight_chakra/protos \
 		--python_out=$(GENERATED_DIR) \
 		--pyi_out=$(GENERATED_DIR) \
 		--grpc_python_out=$(GENERATED_DIR) \
-		et_def.proto infra.proto bind.proto service.proto
+		et_def.proto infra.proto annotate.proto service.proto
 	python3 -m pip uninstall -y keysight-chakra
 	python3 setup.py bdist_wheel
 	python3 -m pip install --no-cache .
