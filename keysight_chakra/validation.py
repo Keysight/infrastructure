@@ -86,7 +86,7 @@ class Validation:
     def _validate_device_connection(self, connection: str):
         pass
 
-    def _validate_binding_infrastructure_path(self, annotation: Annotation):
+    def _validate_target_path(self, annotation: Annotation):
         pass
 
     def _validate_count(self, object: Message):
@@ -144,5 +144,5 @@ class Validation:
         if request.annotations is not None:
             for annotation in request.annotations:
                 self._validate_oneof(annotation, "infrastructure_path")
-                self._validate_binding_infrastructure_path(annotation)
+                self._validate_target_path(annotation)
         return self._validation_response

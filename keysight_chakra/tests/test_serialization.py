@@ -41,14 +41,15 @@ def test_string_serialization():
         ),
     )
 
-    serialized_json = MessageToJson(
-        annotation1,
-        including_default_value_fields=True,
-    )
+    # serialization to json string
+    serialized_json = MessageToJson(annotation1)
 
+    # deserialize json string to protobuf message
     annotation2 = Annotation()
     Parse(serialized_json, annotation2)
 
+    # validate that the original message is the same as the serialized
+    # to deserialized message
     for target1, target2 in zip(annotation1.targets, annotation2.targets):
         assert target1.infrastructure == target2.infrastructure
 
