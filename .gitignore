@@ -3,12 +3,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 .ipynb_checkpoints
-keysight_chakra/tests/*.html
-keysight_chakra/tests/*.yml
+tests/*.html
+tests/*.yml
 .yml
 build
 dist
 .pytest_cache
 *.egg-info
-keysight_chakra/protobuf/*pb2*
-keysight_chakra/tests/generated_artifacts
+keysight_chakra/infra/*pb2*
+keysight_chakra/mlcommons/*pb2*
+tests/generated_artifacts
