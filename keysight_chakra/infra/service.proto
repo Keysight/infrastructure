@@ -4,10 +4,10 @@
 
 syntax = "proto3";
 
-package keysight_chakra.protobuf;
+package keysight_chakra.infra;
 
-import "keysight_chakra/protobuf/infra.proto";
-import "keysight_chakra/protobuf/annotate.proto";
+import "keysight_chakra/infra/infra.proto";
+import "keysight_chakra/infra/annotate.proto";
 
 message ValidationRequest {
   Infrastructure infrastructure = 1;

@@ -1,1 +1,2 @@
-include ./keysight_chakra/protobuf/*
+include ./keysight_chakra/infra/*
+include ./keysight_chakra/mlcommons/*

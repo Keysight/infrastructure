@@ -1,7 +1,7 @@
 import pytest
 
-from keysight_chakra.protobuf.service_pb2 import ValidationRequest
-from keysight_chakra.protobuf.infra_pb2 import (
+from keysight_chakra.infra.service_pb2 import ValidationRequest
+from keysight_chakra.infra.infra_pb2 import (
     Infrastructure,
     Inventory,
     Device,

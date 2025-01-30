@@ -2,7 +2,7 @@ import pytest
 from google.protobuf.json_format import MessageToJson, Parse
 from google.protobuf.any_pb2 import Any
 from google.protobuf.wrappers_pb2 import StringValue
-from keysight_chakra.protobuf.annotate_pb2 import Annotation, Target, Data
+from keysight_chakra.infra.annotate_pb2 import Annotation, Target, Data
 
 
 class AnyString:

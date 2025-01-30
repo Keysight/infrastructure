@@ -1,13 +1,5 @@
-import sys
-import os
-
-for directory_piece in ["../.."]:
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), directory_piece)))
-
-print(sys.path)
-
 import pytest
-from keysight_chakra.protobuf.infra_pb2 import Device, Component, Link, Bandwidth, Npu, Nic
+from keysight_chakra.infra.infra_pb2 import Device, Component, Link, Bandwidth, Npu, Nic
 from keysight_chakra.validation import Validation
 
 

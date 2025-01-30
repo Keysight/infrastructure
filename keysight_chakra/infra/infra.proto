@@ -10,7 +10,7 @@
 
 syntax = "proto3";
 
-package keysight_chakra.protobuf;
+package keysight_chakra.infra;
 
 import "google/protobuf/any.proto";
 
