@@ -14,7 +14,7 @@ clean:
 PROTO_PACKAGE_DIR := ./keysight_chakra/protobuf
 build: ## compile all .proto files and generate artifacts
 	curl -L -o ./keysight_chakra/protobuf/et_def.proto https://raw.githubusercontent.com/mlcommons/chakra/main/schema/protobuf/et_def.proto
-	python3 ./update_et_def_package_name.py
+	sed -i 's/ChakraProtoMsg/keysight_chakra.protobuf/g' ./keysight_chakra/protobuf/et_def.proto
 	rm -rf $(PROTO_PACKAGE_DIR)/*pb2* || true
 	python3 -m grpc_tools.protoc \
 		--proto_path=./ \
