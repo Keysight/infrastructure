@@ -1,2 +1,1 @@
-include ./keysight_chakra/protos/*.proto
-include ./keysight_chakra/generated/*.pyi
+include ./keysight_chakra/protobuf/*

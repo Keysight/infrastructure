@@ -5,18 +5,26 @@ env: ## install env requirements
 	echo "installing python packages..." && \
 	pip install -r requirements.txt
 
+.PHONY: clean
+clean:
+	rm -rf build/* || true
+	rm -rf dist/* || true
+
 .PHONY: build
-GENERATED_DIR := ./keysight_chakra/generated
+PROTO_PACKAGE_DIR := ./keysight_chakra/protobuf
 build: ## compile all .proto files and generate artifacts
-	curl -L -o ./keysight_chakra/protos/et_def.proto https://raw.githubusercontent.com/mlcommons/chakra/main/schema/protobuf/et_def.proto
-	rm -rf $(GENERATED_DIR) || true
-	mkdir -p $(GENERATED_DIR)
+	curl -L -o ./keysight_chakra/protobuf/et_def.proto https://raw.githubusercontent.com/mlcommons/chakra/main/schema/protobuf/et_def.proto
+	python3 ./update_et_def_package_name.py
+	rm -rf $(PROTO_PACKAGE_DIR)/*pb2* || true
 	python3 -m grpc_tools.protoc \
-		--proto_path=./keysight_chakra/protos \
-		--python_out=$(GENERATED_DIR) \
-		--pyi_out=$(GENERATED_DIR) \
-		--grpc_python_out=$(GENERATED_DIR) \
-		et_def.proto infra.proto annotate.proto service.proto
+		--proto_path=./ \
+		--python_out=./ \
+		--pyi_out=./ \
+		--grpc_python_out=./ \
+		$(PROTO_PACKAGE_DIR)/infra.proto \
+		$(PROTO_PACKAGE_DIR)/annotate.proto \
+		$(PROTO_PACKAGE_DIR)/service.proto \
+		$(PROTO_PACKAGE_DIR)/et_def.proto 
 	python3 -m pip uninstall -y keysight-chakra
 	python3 setup.py bdist_wheel
 	python3 -m pip install --no-cache .

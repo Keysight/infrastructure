@@ -16,7 +16,7 @@ with open("./VERSION", "rt") as fp:
 # "install_destination_package_path": "source_dir_path"
 package_dir_map = {
     f"{package_base}": "./keysight_chakra",
-    f"{package_base}/generated": "./keysight_chakra/generated",
+    f"{package_base}/protobuf": "./keysight_chakra/protobuf",
     f"{package_base}/tests": "./keysight_chakra/tests",
 }
 
