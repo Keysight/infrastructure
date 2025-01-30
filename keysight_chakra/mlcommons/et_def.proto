@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package ChakraProtoMsg;
+package keysight_chakra.mlcommons;
 
 message AttributeProto {
   string name = 1;

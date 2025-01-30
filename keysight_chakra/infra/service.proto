@@ -4,14 +4,14 @@
 
 syntax = "proto3";
 
-package service;
+package keysight_chakra.infra;
 
-import "infra.proto";
-import "annotate.proto";
+import "keysight_chakra/infra/infra.proto";
+import "keysight_chakra/infra/annotate.proto";
 
 message ValidationRequest {
-  infra.Infrastructure infrastructure = 1;
-  repeated annotate.Annotation annotations = 2;
+  Infrastructure infrastructure = 1;
+  repeated Annotation annotations = 2;
 }
 
 message ValidationError {

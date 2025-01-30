@@ -5,9 +5,9 @@ client.
 
 from typing import Annotated
 from google.protobuf.message import Message
-from generated.service_pb2 import ValidationRequest, ValidationError, ValidationResponse
-from generated.infra_pb2 import Device
-from generated.annotate_pb2 import Annotation
+from keysight_chakra.infra.service_pb2 import ValidationRequest, ValidationError, ValidationResponse
+from keysight_chakra.infra.infra_pb2 import Device
+from keysight_chakra.infra.annotate_pb2 import Annotation
 
 
 class Validation:

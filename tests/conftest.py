@@ -1,11 +1,5 @@
-import sys
-import os
-
-for directory_piece in ["..", "generated", "tests"]:
-    sys.path.append(os.path.join(os.path.dirname(__file__), directory_piece))
-
 import pytest
-from keysight_chakra.generated.infra_pb2 import Device, Component, Link, Bandwidth, Npu, Nic
+from keysight_chakra.infra.infra_pb2 import Device, Component, Link, Bandwidth, Npu, Nic
 from keysight_chakra.validation import Validation
 
 
