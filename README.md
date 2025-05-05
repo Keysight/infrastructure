@@ -6,11 +6,11 @@ Submit it to the infrastructure `create` API to validate and store the data in a
 
 Use the `query` api to find paths from npu to npu.
 
-![Process](process.png)
+![Process](resources/process.png)
 
 Given the following logical `3 tier fabric`
 
-![3tierfabric](3tier-fabric.png)
+![3tierfabric](resources/3tier-fabric.png)
 
 the following steps illustrate how to create infrastructure as a graph consisting of `dgxa100` and `tomahawk3` devices as hosts and switches:
 
@@ -180,12 +180,6 @@ bindings:
           - mtu: ...
           - loopback-mode: ...
           - enabled: ...
-```
-
-### Application Configuration
-
-```yaml
-
 ```
 
 ## Validate the Infrastructure

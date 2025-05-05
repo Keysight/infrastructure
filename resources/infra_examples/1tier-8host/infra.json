@@ -1,0 +1,112 @@
+{
+    "inventory": {
+        "devices": {
+            "GENERIC_HOST": {
+                "name": "GENERIC_HOST",
+                "components": {
+                    "npu_interconnect_switch": {
+                        "name": "npu_interconnect_switch",
+                        "count": 1,
+                        "switch": {
+                            "custom": {}
+                        }
+                    },
+                    "nic": {
+                        "name": "nic",
+                        "count": 1,
+                        "nic": {
+                            "ethernet": {}
+                        }
+                    },
+                    "npu": {
+                        "name": "npu",
+                        "count": 1,
+                        "npu": {
+                            "memory": "MEM_UNSPECIFIED"
+                        }
+                    }
+                },
+                "links": {
+                    "pcie": {
+                        "name": "pcie"
+                    },
+                    "npu_interconnect": {
+                        "name": "npu_interconnect",
+                        "bandwidth": {
+                            "gbps": 1600
+                        }
+                    }
+                },
+                "connections": [
+                    "npu.0.pcie.nic.0",
+                    "npu.0.npu_interconnect.npu_interconnect_switch.0"
+                ]
+            },
+            "TIER_0": {
+                "name": "TIER_0",
+                "components": {
+                    "port-down": {
+                        "name": "port-down",
+                        "count": 8,
+                        "nic": {
+                            "ethernet": {}
+                        }
+                    },
+                    "asic": {
+                        "name": "asic",
+                        "count": 1,
+                        "cpu": {
+                            "memory": "MEM_RAM"
+                        }
+                    }
+                },
+                "links": {
+                    "mii": {
+                        "name": "mii"
+                    }
+                },
+                "connections": [
+                    "port-down.0.mii.asic.0",
+                    "port-down.1.mii.asic.0",
+                    "port-down.2.mii.asic.0",
+                    "port-down.3.mii.asic.0",
+                    "port-down.4.mii.asic.0",
+                    "port-down.5.mii.asic.0",
+                    "port-down.6.mii.asic.0",
+                    "port-down.7.mii.asic.0"
+                ]
+            }
+        },
+        "links": {
+            "100_gbps": {
+                "name": "100_gbps",
+                "description": "100 Gbps ethernet link.",
+                "bandwidth": {
+                    "gbps": 100
+                }
+            }
+        }
+    },
+    "device_instances": {
+        "tier_0": {
+            "name": "tier_0",
+            "device": "TIER_0",
+            "count": 1
+        },
+        "generic": {
+            "name": "generic",
+            "device": "GENERIC_HOST",
+            "count": 8
+        }
+    },
+    "connections": [
+        "generic.0.nic.0.100_gbps.tier_0.0.port-down.0",
+        "generic.1.nic.0.100_gbps.tier_0.0.port-down.1",
+        "generic.2.nic.0.100_gbps.tier_0.0.port-down.2",
+        "generic.3.nic.0.100_gbps.tier_0.0.port-down.3",
+        "generic.4.nic.0.100_gbps.tier_0.0.port-down.4",
+        "generic.5.nic.0.100_gbps.tier_0.0.port-down.5",
+        "generic.6.nic.0.100_gbps.tier_0.0.port-down.6",
+        "generic.7.nic.0.100_gbps.tier_0.0.port-down.7"
+    ]
+}
