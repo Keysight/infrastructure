@@ -41,6 +41,7 @@ Now we will be designing a 4 port generic switch and a single nic host as a part
 #### Building Infrastructure: Design a 4 port Generic Switch
 
 Lets define a Generic Switch. Since its a simple switch, we can define two major components inside it:
+
 - nic
 - asic
 
@@ -73,8 +74,9 @@ inventory:
 ```
 
 Here, we have defined a generic_switch with two components: asic with a count of 1 and port with a count of 4. Once the components are defined, we can define connection between component with three parts:
+
 - Source Part
-- Link 
+- Link
 - Destination Part
 
 The source part contains the source component and its index. The destination part is analogous to the source part and concerns itself with the destination component. The link joins the source part and the destination part. Therefore, the connection would look something like this:
@@ -342,3 +344,7 @@ Another example is to define an `Open Config Interface` for our `rack_switch`:
   targets:
     - device_instance: rack_switch
 ```
+
+## More Examples
+
+More examples are located [here.](resources/infra_examples/)
