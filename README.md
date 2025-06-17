@@ -63,7 +63,7 @@ The switch uses four mmi links to connect four different ports with the same asi
 We can think of these components as nodes in a graph these are connected to each other through an edge. So the switch definition will look like the one given below yaml definition :
 
 ```yaml
-inventory: 
+inventory:
   devices:
     generic_switch:
       name: generic_switch
@@ -90,9 +90,9 @@ inventory:
 
 Here, we have defined a generic_switch with two components: asic with a count of 1 and port with a count of 4. Once the components are defined, we can define connection between components with three parts:
 
-```<source>.<link>.<destination>```
+`<source>.<link>.<destination>`
 
-The ```<source>``` contains the source component and its index. The ```<destination>``` specifies the destination component and its index. The link joins the source and the destination. Therefore, the connection would look something like this:
+The `<source>` contains the source component and its index. The `<destination>` specifies the destination component and its index. The link joins the source and the destination. Therefore, the connection would look something like this:
 
 ```
 <source>.<src_index>.<link>.<destination>.<dst_index>
@@ -145,13 +145,13 @@ So far we have defined a switch and a host. We have not defined the 100G links. 
 ```yaml
 links:
   100Gbps:
-    name: 100Gbps  
+    name: 100Gbps
     bandwidth:
       gbps: 100
     description: 100 Gbps ethernet link.
 ```
 
-Here, we have defined the link with the ```name: 100Gbps``` which has a bandwidth set to a 100 gbps. Later 4 such links will be used in connecting 4 devices with 4 switch ports, as show in the above picture.
+Here, we have defined the link with the `name: 100Gbps` which has a bandwidth set to a 100 gbps. Later 4 such links will be used in connecting 4 devices with 4 switch ports, as show in the above picture.
 
 ### Building Infrastructure: Creating Device Instances
 
@@ -160,7 +160,7 @@ We can scale the infrastructure by using the `device instance` message. In our e
 ```yaml
 device_instances:
   host:
-    nameL host
+    name: host
     count: 4
     device: generic_host
   rack_switch:
@@ -181,7 +181,7 @@ Connections between the devices are made by the components of the device and lin
 <src_device>.<dev_index><src_component><comp_index>.<link>.<dst_device>.<dev_index><dst_component><comp_index>
 ```
 
-The ``<src_device>.<dev_index><src_component><comp_index>`` contains the source device, index of the device, component within the device, and the index of the component. Same goes for the destination. The Link mainly defines the link between the source and destination.
+The `<src_device>.<dev_index><src_component><comp_index>` contains the source device, index of the device, component within the device, and the index of the component. Same goes for the destination. The Link mainly defines the link between the source and destination.
 
 A "." separator is used to separate between two infrastructure elements. Now to connect a `host` with the `rack_switch` we can define the connection as:
 
@@ -224,6 +224,7 @@ device_instances:
 inventory:
   devices:
     generic_host:
+      name: generic_host
       components:
         nic:
           count: 1
@@ -240,8 +241,8 @@ inventory:
       links:
         pcie:
           name: pcie
-      name: generic_host
     generic_switch:
+      name: generic_switch
       components:
         asic:
           count: 1
@@ -261,13 +262,12 @@ inventory:
       links:
         mii:
           name: mii
-      name: generic_switch
   links:
     100Gbps:
+      name: 100Gbps
       bandwidth:
         gbps: 100
       description: 100 Gbps ethernet link.
-      name: 100Gbps
 ```
 
 ## Extending Infrastructure as a Graph
