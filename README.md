@@ -55,7 +55,7 @@ To define a Device:
 
 Now we will be designing a 4 port generic switch as a part of device inventory.
 
-### Building Infrastructure: Defining a 4 port Switch
+### Building Infrastructure: Defining a 4 port switch
 
 Lets define a simple Generic Switch.
 ![generic_switch](resources/images/generic_switch_host_diagram/generic_switch.png)
@@ -73,7 +73,10 @@ This switch uses one type of link to connect between asic and port :
 
 The switch uses four mii links to connect four different ports with the same asic. So internally the switch has 4 connections.
 
-We can think of these components as nodes in a graph these are connected to each other through an edge. So the switch definition will look like the one given below yaml definition :
+We can think of these components as nodes in a graph these are connected to each other through an edge. We can generate the definition as:
+
+<details open>
+<summary><strong>YAML Definition</strong></summary>
 
 ```yaml
 inventory:
@@ -81,16 +84,16 @@ inventory:
     generic_switch:
       name: generic_switch
       components:
+        port-down:
+          name: port
+          count: 4
+          nic:
+            ethernet: {}
         asic:
           name: asic
           count: 1
           cpu:
             memory: MEM_RAM
-        port:
-          name: port
-          count: 4
-          nic:
-            ethernet: {}
       links:
         mii:
           name: mii
@@ -100,6 +103,56 @@ inventory:
         - port.2.mii.asic.0
         - port.3.mii.asic.0
 ```
+
+</details>
+
+<br>
+
+<details>
+<summary><strong>JSON Definition</strong></summary>
+
+```json
+{
+  "inventory": {
+    "devices": {
+      "generic_switch": {
+        "name": "generic_switch",
+        "components": {
+          "port-down": {
+            "name": "port",
+            "count": 4,
+            "nic": {
+              "ethernet": {}
+            }
+          },
+          "asic": {
+            "name": "asic",
+            "count": 1,
+            "cpu": {
+              "memory": "MEM_RAM"
+            }
+          }
+        },
+        "links": {
+          "mii": {
+            "name": "mii"
+          }
+        },
+        "connections": [
+          "port.0.mii.asic.0",
+          "port.1.mii.asic.0",
+          "port.2.mii.asic.0",
+          "port.3.mii.asic.0"
+        ]
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<br>
 
 Here, we have defined a generic_switch with two components: asic with a count of 1 and port with a count of 4. Once the components are defined, we can define connection between components with three parts:
 
@@ -124,6 +177,9 @@ Our Host has two interconnected components:
 
 Again we can think of these components as node in a graph which are connected through an edge or pcie connection in our case. So the host definition will look as given below:
 
+<details open>
+<summary><strong>YAML Definition</strong></summary>
+
 ```yaml
 inventory:
   devices:
@@ -131,13 +187,13 @@ inventory:
       name: generic_host
       components:
         nic:
-          count: 1
           name: nic
+          count: 1
           nic:
             ethernet: {}
         npu:
-          count: 1
           name: npu
+          count: 1
           npu:
             memory: MEM_UNSPECIFIED
       links:
@@ -147,6 +203,51 @@ inventory:
         - npu.0.pcie.nic.0
 ```
 
+</details>
+
+<br>
+
+<details>
+<summary><strong>JSON Definition</strong></summary>
+
+```json
+{
+  "inventory": {
+    "devices": {
+      "generic_host": {
+        "name": "generic_host",
+        "components": {
+          "nic": {
+            "name": "nic",
+            "count": 1,
+            "nic": {
+              "ethernet": {}
+            }
+          },
+          "npu": {
+            "name": "npu",
+            "count": 1,
+            "npu": {
+              "memory": "MEM_UNSPECIFIED"
+            }
+          }
+        },
+        "links": {
+          "pcie": {
+            "name": "pcie"
+          }
+        },
+        "connections": ["npu.0.pcie.nic.0"]
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<br>
+
 ### Building Infrastructure: Defining Links
 
 Now our objective is to define a infrastructure build using the switch and hose that we have defined earlier. We want to build an infrastructure that as one switch and four hosts are directly connected to the switch over 100G Ethernet.
@@ -155,14 +256,45 @@ Now our objective is to define a infrastructure build using the switch and hose 
 
 So far we have defined a switch and a host. We have not defined the 100G links. So first we define a 100G ethernet link. We can define a link in the following manner:
 
+<details open>
+<summary><strong>YAML Definition</strong></summary>
+
 ```yaml
-links:
+inventory:
+  links:
   100Gbps:
     name: 100Gbps
+    description: 100Gbps ethernet link.
     bandwidth:
       gbps: 100
-    description: 100 Gbps ethernet link.
 ```
+
+</details>
+
+<br>
+
+<details>
+<summary><strong>JSON Definition</strong></summary>
+
+```json
+{
+  "inventory": {
+    "links": {
+      "100Gbps": {
+        "name": "100Gbps",
+        "description": "100Gbps ethernet link.",
+        "bandwidth": {
+          "gbps": 100
+        }
+      }
+    }
+  }
+}
+```
+
+</details>
+
+<br>
 
 Here, we have defined the link with the `name: 100Gbps` which has a bandwidth set to a 100 gbps. Later 4 such links will be used in connecting 4 devices with 4 switch ports, as show in the above picture.
 
@@ -170,17 +302,48 @@ Here, we have defined the link with the `name: 100Gbps` which has a bandwidth se
 
 We can scale the infrastructure by using the `device instance` message. In our example, we would want to connect 4 generic_hosts to a single generic_switch. The idea is to instantiate each of them with a count, so to instantiate 4 `generic_host` as `host`, and one `generic_switch` as a `rack_switch`. We can define the data model as:
 
+<details open>
+<summary><strong>YAML Definition</strong></summary>
+
 ```yaml
 device_instances:
-  host:
-    name: host
-    count: 4
-    device: generic_host
   rack_switch:
     name: rack_switch
-    count: 1
     device: generic_switch
+    count: 1
+  host:
+    name: host
+    device: generic_host
+    count: 4
 ```
+
+</details>
+
+<br>
+
+<details>
+<summary><strong>JSON Definition</strong></summary>
+
+```json
+{
+  "device_instances": {
+    "rack_switch": {
+      "name": "rack_switch",
+      "device": "generic_switch",
+      "count": 1
+    },
+    "host": {
+      "name": "host",
+      "device": "generic_host",
+      "count": 4
+    }
+  }
+}
+```
+
+</details>
+
+<br>
 
 The idea is that we have defined the devices under `inventory - devices` section, which acts as a blueprint or template. We need to instantiate them to crate the whole infrastructure - like the way we create objects of a class. With the count specified, it creates multiple copies of the devices starting from index 0.
 
@@ -198,14 +361,37 @@ The `<src_device>.<dev_index><src_component><comp_index>` contains the source de
 
 A "." separator is used to separate between two infrastructure elements. Now to connect a `host` with the `rack_switch` we can define the connection as:
 
+<details open>
+<summary><strong>YAML Definition</strong></summary>
+
 ```yaml
 connections:
   - host.0.nic.0.100Gbps.rack_switch.0.port.0
 ```
 
+</details>
+
+<br>
+
+<details>
+<summary><strong>JSON Definition</strong></summary>
+
+```json
+{
+  "connections": ["host.0.nic.0.100Gbps.rack_switch.0.port.0"]
+}
+```
+
+</details>
+
+<br>
+
 This means that the host at index 0, through its nic component 0 is connected to port 0 of rack_switch 0. The link between this sour and destination is of 100Gbps. This represents the first link in the above picture.
 
 All 4 link definitions will look like below:
+
+<details open>
+<summary><strong>YAML Definition</strong></summary>
 
 ```yaml
 connections:
@@ -215,9 +401,34 @@ connections:
   - host.3.nic.0.100Gbps.rack_switch.0.port.3
 ```
 
+</details>
+
+<br>
+
+<details>
+<summary><strong>JSON Definition</strong></summary>
+
+```json
+{
+  "connections": [
+    "host.0.nic.0.100Gbps.rack_switch.0.port.0",
+    "host.1.nic.0.100Gbps.rack_switch.0.port.1",
+    "host.2.nic.0.100Gbps.rack_switch.0.port.2",
+    "host.3.nic.0.100Gbps.rack_switch.0.port.3"
+  ]
+}
+```
+
+</details>
+
+<br>
+
 ## Building Infrastructure: Complete Example
 
 After combining all the definitions, we can arrive at the final design:
+
+<details open>
+<summary><strong>YAML Definition</strong></summary>
 
 ```yaml
 inventory:
@@ -235,53 +446,155 @@ inventory:
           count: 1
           npu:
             memory: MEM_UNSPECIFIED
-      connections:
-        - npu.0.pcie.nic.0
       links:
         pcie:
           name: pcie
+      connections:
+        - npu.0.pcie.nic.0
     generic_switch:
       name: generic_switch
       components:
-        asic:
-          name: asic
-          count: 1
-          cpu:
-            memory: MEM_RAM
         port-down:
           name: port
           count: 4
           nic:
             ethernet: {}
+        asic:
+          name: asic
+          count: 1
+          cpu:
+            memory: MEM_RAM
+      links:
+        mii:
+          name: mii
       connections:
         - port.0.mii.asic.0
         - port.1.mii.asic.0
         - port.2.mii.asic.0
         - port.3.mii.asic.0
-      links:
-        mii:
-          name: mii
   links:
     100Gbps:
       name: 100Gbps
+      description: 100Gbps ethernet link.
       bandwidth:
         gbps: 100
-      description: 100 Gbps ethernet link.
 device_instances:
-  host:
-    name: host
-    count: 4
-    device: generic_host
   rack_switch:
     name: rack_switch
-    count: 1
     device: generic_switch
+    count: 1
+  host:
+    name: host
+    device: generic_host
+    count: 4
 connections:
   - host.0.nic.0.100Gbps.rack_switch.0.port.0
   - host.1.nic.0.100Gbps.rack_switch.0.port.1
   - host.2.nic.0.100Gbps.rack_switch.0.port.2
   - host.3.nic.0.100Gbps.rack_switch.0.port.3
 ```
+
+</details>
+
+<br>
+
+<details>
+<summary><strong>JSON Definition</strong></summary>
+
+```json
+{
+  "inventory": {
+    "devices": {
+      "generic_host": {
+        "name": "generic_host",
+        "components": {
+          "nic": {
+            "name": "nic",
+            "count": 1,
+            "nic": {
+              "ethernet": {}
+            }
+          },
+          "npu": {
+            "name": "npu",
+            "count": 1,
+            "npu": {
+              "memory": "MEM_UNSPECIFIED"
+            }
+          }
+        },
+        "links": {
+          "pcie": {
+            "name": "pcie"
+          }
+        },
+        "connections": ["npu.0.pcie.nic.0"]
+      },
+      "generic_switch": {
+        "name": "generic_switch",
+        "components": {
+          "port-down": {
+            "name": "port",
+            "count": 4,
+            "nic": {
+              "ethernet": {}
+            }
+          },
+          "asic": {
+            "name": "asic",
+            "count": 1,
+            "cpu": {
+              "memory": "MEM_RAM"
+            }
+          }
+        },
+        "links": {
+          "mii": {
+            "name": "mii"
+          }
+        },
+        "connections": [
+          "port.0.mii.asic.0",
+          "port.1.mii.asic.0",
+          "port.2.mii.asic.0",
+          "port.3.mii.asic.0"
+        ]
+      }
+    },
+    "links": {
+      "100Gbps": {
+        "name": "100Gbps",
+        "description": "100Gbps ethernet link.",
+        "bandwidth": {
+          "gbps": 100
+        }
+      }
+    }
+  },
+  "device_instances": {
+    "rack_switch": {
+      "name": "rack_switch",
+      "device": "generic_switch",
+      "count": 1
+    },
+    "host": {
+      "name": "host",
+      "device": "generic_host",
+      "count": 4
+    }
+  },
+  "connections": [
+    "host.0.nic.0.100Gbps.rack_switch.0.port.0",
+    "host.1.nic.0.100Gbps.rack_switch.0.port.1",
+    "host.2.nic.0.100Gbps.rack_switch.0.port.2",
+    "host.3.nic.0.100Gbps.rack_switch.0.port.3"
+  ]
+}
+```
+
+</details>
+
+<br>
 
 ## Binding Logical Infrastructure with Physical Attributes
 
@@ -300,8 +613,13 @@ Lets annotate device type to our previous example:
 
 The idea is to add a `Device Type` to our infra devices with the types being `physical_switch`, `physical_host`, `vm_host`, `vm_switch`. This would provide some more insights on what the device type is. Annotating the infrastructure:
 
+<details open>
+<summary><strong>YAML Definition</strong></summary>
+
 ```yaml
-- data:
+- targets:
+    - infrastructure: Infrastructure
+  data:
     name: DeviceTypes
     value:
       "@type": type.googleapis.com/google.protobuf.ListValue
@@ -310,27 +628,104 @@ The idea is to add a `Device Type` to our infra devices with the types being `ph
           device_type: physical_host
         - device_instance: rack_switch
           device_type: physical_switch
-  targets:
-    - infrastructure: Infrastructure
 ```
+
+</details>
+
+<br>
+
+<details>
+<summary><strong>JSON Definition</strong></summary>
+
+```json
+[
+  {
+    "targets": [
+      {
+        "infrastructure": "Infrastructure"
+      }
+    ],
+    "data": {
+      "name": "DeviceTypes",
+      "value": {
+        "@type": "type.googleapis.com/google.protobuf.ListValue",
+        "value": [
+          {
+            "device_instance": "host",
+            "device_type": "physical_host"
+          },
+          {
+            "device_instance": "rack_switch",
+            "device_type": "physical_switch"
+          }
+        ]
+      }
+    }
+  }
+]
+```
+
+</details>
+
+<br>
 
 Here, we need to set the target and provide a value. The target is a list of elements defined in the infrastructure. Here we are applying it to the overall infrastructure and the value contains a special schema which defines the device_instance and associates it with a device_type.
 
 > Note: The schema can be internal to an organization.
 
-Another example is to define an `Open Config Interface` for our `rack_switch`:
+Another example is to define an `OpenConfigInterface` for our `rack_switch`:
+
+<details open>
+<summary><strong>YAML Definition</strong></summary>
 
 ```yaml
-- data:
+- targets:
+    - device_instance: rack_switch
+  data:
     name: OpenConfigInterface
     value:
       "@type": type.googleapis.com/google.protobuf.Struct
       value:
         config:
-          - type: ...
-          - mtu: ...
-          - loopback-mode: ...
-          - enabled: ...
-  targets:
-    - device_instance: rack_switch
+          type: ...
+          mtu: ...
+          loopback-mode: ...
+          enabled: ...
 ```
+
+</details>
+
+<br>
+
+<details>
+<summary><strong>JSON Definition</strong></summary>
+
+```json
+[
+  {
+    "targets": [
+      {
+        "device_instance": "rack_switch"
+      }
+    ],
+    "data": {
+      "name": "OpenConfigInterface",
+      "value": {
+        "@type": "type.googleapis.com/google.protobuf.Struct",
+        "value": {
+          "config": {
+            "type": [],
+            "mtu": [],
+            "loopback-mode": [],
+            "enabled": []
+          }
+        }
+      }
+    }
+  }
+]
+```
+
+</details>
+
+<br>
