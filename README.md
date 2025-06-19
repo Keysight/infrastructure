@@ -10,6 +10,19 @@ While Protobuf itself uses a compact binary format, the data defined by the Prot
 
 In this README, we have extensively used YAML in the examples above due to its readability and suitability for configuration and data serialization tasks. YAML's clear syntax for nested structures and lists makes it an excellent complement to the Protobuf-defined data model.
 
+## Table of Contents:
+
+- [Introduction](#Network-Infrastructure-as-a-Graph)
+- [Lets Build Infrastructure](#lets-build-infrastructure)
+  - [Building Infrastructure: Creating Device Inventory](#building-infrastructure-creating-device-inventory)
+  - [Designing a 4 port switch](#building-infrastructure-defining-a-4-port-switch)
+  - [Designing a simple host](#building-infrastructure-design-host-with-a-single-nic)
+  - [Defining Links](#building-infrastructure-defining-links)
+  - [Creating Device Instances](#building-infrastructure-creating-device-instances)
+  - [Connecting Device Instances](#building-infrastructure-connecting-device-instances)
+  - [Complete Example](#building-infrastructure-complete-example)
+- [Annotating Logical Infrastructure with Physical Attributes](#binding-logical-infrastructure-with-physical-attributes)
+
 ## Lets Build Infrastructure
 
 The main steps in designing a network infrastructure using infra.proto is as follows:
@@ -23,7 +36,7 @@ The main steps in designing a network infrastructure using infra.proto is as fol
 - Instantiating devices: The idea is using the device definition in the Inventory a blueprint or template create as many devices needed to describe the infrastructure.
 - Defining Connections: Creating connections between device instances.
 
-The steps below will guide you in designing a simple network infrastructure having 4 hosts connected to a single switch. For simplicity, we will be using a hypothetical Generic Switch and Host architecture having minimal components.
+The steps below will guide you in designing a simple network infrastructure having 4 hosts connected to a single switch. For simplicity, we will be using a hypothetical Generic Switch and Host having minimal components architecture.
 
 ### Building Infrastructure: Creating Device Inventory
 
@@ -42,23 +55,23 @@ To define a Device:
 
 Now we will be designing a 4 port generic switch as a part of device inventory.
 
-#### Building Infrastructure: Defining a 4 port Switch
+### Building Infrastructure: Defining a 4 port Switch
 
 Lets define a simple Generic Switch.
 ![generic_switch](resources/images/generic_switch_host_diagram/generic_switch.png)
 
-This switch is made of one asic component and four front panel ports. Front panel ports connects with the asic though mmi interface.
+This switch is made of one asic component and four front panel ports. Front panel ports connects with the asic though mii interface.
 
 User can define this switch with two major components inside it:
 
 - port
 - asic
 
-This switch uses one type of link to connect between acic and port :
+This switch uses one type of link to connect between asic and port :
 
-- mmi
+- mii
 
-The switch uses four mmi links to connect four different ports with the same asic. So internally the switch has 4 connections.
+The switch uses four mii links to connect four different ports with the same asic. So internally the switch has 4 connections.
 
 We can think of these components as nodes in a graph these are connected to each other through an edge. So the switch definition will look like the one given below yaml definition :
 
@@ -98,7 +111,7 @@ The `<source>` contains the source component and its index. The `<destination>` 
 <source>.<src_index>.<link>.<destination>.<dst_index>
 ```
 
-#### Building Infrastructure: Design Host with a single Nic
+### Building Infrastructure: Design host with a single nic
 
 Let's design the Host in a similar manner as we designed Switch.
 
@@ -134,7 +147,7 @@ inventory:
         - npu.0.pcie.nic.0
 ```
 
-### Building Infrastructure: With Switches, Hosts & Interconnecting Links
+### Building Infrastructure: Defining Links
 
 Now our objective is to define a infrastructure build using the switch and hose that we have defined earlier. We want to build an infrastructure that as one switch and four hosts are directly connected to the switch over 100G Ethernet.
 
@@ -202,38 +215,24 @@ connections:
   - host.3.nic.0.100Gbps.rack_switch.0.port.3
 ```
 
-## Building Infrastructure: Complete Definition
+## Building Infrastructure: Complete Example
 
 After combining all the definitions, we can arrive at the final design:
 
 ```yaml
-connections:
-  - host.0.nic.0.100Gbps.rack_switch.0.port.0
-  - host.1.nic.0.100Gbps.rack_switch.0.port.1
-  - host.2.nic.0.100Gbps.rack_switch.0.port.2
-  - host.3.nic.0.100Gbps.rack_switch.0.port.3
-device_instances:
-  host:
-    count: 4
-    device: generic_host
-    name: host
-  rack_switch:
-    count: 1
-    device: generic_switch
-    name: rack_switch
 inventory:
   devices:
     generic_host:
       name: generic_host
       components:
         nic:
-          count: 1
           name: nic
+          count: 1
           nic:
             ethernet: {}
         npu:
-          count: 1
           name: npu
+          count: 1
           npu:
             memory: MEM_UNSPECIFIED
       connections:
@@ -245,13 +244,13 @@ inventory:
       name: generic_switch
       components:
         asic:
+          name: asic
           count: 1
           cpu:
             memory: MEM_RAM
-          name: asic
         port-down:
-          count: 4
           name: port
+          count: 4
           nic:
             ethernet: {}
       connections:
@@ -268,20 +267,34 @@ inventory:
       bandwidth:
         gbps: 100
       description: 100 Gbps ethernet link.
+device_instances:
+  host:
+    name: host
+    count: 4
+    device: generic_host
+  rack_switch:
+    name: rack_switch
+    count: 1
+    device: generic_switch
+connections:
+  - host.0.nic.0.100Gbps.rack_switch.0.port.0
+  - host.1.nic.0.100Gbps.rack_switch.0.port.1
+  - host.2.nic.0.100Gbps.rack_switch.0.port.2
+  - host.3.nic.0.100Gbps.rack_switch.0.port.3
 ```
 
-## Extending Infrastructure as a Graph
+## Binding Logical Infrastructure with Physical Attributes
 
-The main intent of infra.proto is to define and design a network fabric. This allows end users to define the devices as nodes and links as edges. The data model also allows us to define and design devices by allowing us to add links and components present in the device. This also models the device internals as a graph and a subgraph if we look it from the whole infrastructure aspect.
+The main intent of infra.proto is to define and design a logical network fabric. This allows end users to define the devices as nodes and links as edges. The data model also allows us to define and design devices by allowing us to add links and components present in the device. This also models the device internals as a subgraph.
 
-Since the infra.proto allows us to define the network infrastructure, a new data model (annotate.proto) was necessary to allow and define various bindings which may be suitable to multiple use cases. This data model allows to add/bind/annotate various infrastructure elements. This allows to add:
+Another data model: annotate.proto allow to define and bind various physical network parameters with the logical infrastructure. The user can bind:
 
 - Vendor specific data
 - More qualities of the infrastructure
 - Attach certain device performance attributes, like: - Latency - Routing tables
   and helps add more context and content to infrastructure elements.
 
-The core intent is to decouple various bindings with infrastructure, separating the concerns of designing the infrastructure with additional data which may not be relevant to external use-cases. This allows the ability to share the infrastructure without the worry and hassle to separate unwanted data or data.
+The core intent is to decouple various bindings with infrastructure, separating the concerns of designing the logical infrastructure with additional data which may not be relevant to external use-cases. This allows the ability to share the infrastructure without the worry and hassle to separate unwanted data or data.
 
 Lets annotate device type to our previous example:
 
@@ -295,7 +308,7 @@ The idea is to add a `Device Type` to our infra devices with the types being `ph
       value:
         - device_instance: host
           device_type: physical_host
-        - device_instance: rack_Switch
+        - device_instance: rack_switch
           device_type: physical_switch
   targets:
     - infrastructure: Infrastructure
@@ -321,7 +334,3 @@ Another example is to define an `Open Config Interface` for our `rack_switch`:
   targets:
     - device_instance: rack_switch
 ```
-
-## More Examples
-
-More examples are located [here.](resources/infra_examples/)
