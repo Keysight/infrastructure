@@ -24,9 +24,10 @@ While Protobuf itself uses a compact binary format, protobuf data can be convert
 
 The main steps in designing a network infrastructure using infra.proto is as follows:
 
-- Creating Inventory: Here we define the devices type and the external links type that will be used to describe the infrastructure. 
-  - Defining Devices: Here we define a single device for each device type that is present in the infrastructure, its inside  components and links inside
-    - Define Component 
+- Creating Inventory: Here we define the devices type and the external links type that will be used to describe the infrastructure.
+
+  - Defining Devices: Here we define a single device for each device type that is present in the infrastructure, its inside components and links inside
+    - Define Component
     - Define Links to connect the components with-in the device
     - Create Connection between Components using Links
   - Defining External Links: Here we define the external link type that connects two devices
@@ -34,7 +35,6 @@ The main steps in designing a network infrastructure using infra.proto is as fol
 - Building the infrastructure as graph
   - Instantiating devices: Use the device definition in the inventory as a template to create multiple devices for the infrastructure.
   - Defining connections: Use the external link definition to create connections between device instances.
-  
 
 Follow these steps to design a basic network with 4 hosts connected to one switch. For simplicity we will use a basic Generic Switch and Host architecture for simplicity.
 
@@ -84,7 +84,7 @@ inventory:
     generic_switch:
       name: generic_switch
       components:
-        port-down:
+        port:
           name: port
           count: 4
           nic:
@@ -118,7 +118,7 @@ inventory:
       "generic_switch": {
         "name": "generic_switch",
         "components": {
-          "port-down": {
+          "port": {
             "name": "port",
             "count": 4,
             "nic": {
@@ -299,12 +299,13 @@ inventory:
 In this example, we have defined a link `name: 100Gbps` with a bandwidth of 100 gbps. Subsequently, four such links will be utilized to connect four devices to four switch ports, as illustrated in the above image.
 
 ### Creating Device Instances
-We can scale the infrastructure by using the `device instance` message. For example, to connect 4 `generic_hosts` to one `generic_switch` by instantiating each with a count: 
-- 4 `generic_hosts` as host, and 
-- 1 `generic_switch` as `rack_switch`. 
+
+We can scale the infrastructure by using the `device instance` message. For example, to connect 4 `generic_hosts` to one `generic_switch` by instantiating each with a count:
+
+- 4 `generic_hosts` as host, and
+- 1 `generic_switch` as `rack_switch`.
 
 The data model can be defined as follows:
-
 
 <details open>
 <summary><strong>YAML Definition</strong></summary>
@@ -353,7 +354,6 @@ The devices are defined under the `inventory - devices` section, serving as a bl
 
 Next, these device instances need to be connected over 100G ethernet links as illustrated in the picture above.
 
-
 ### Connecting Device Instances
 
 Connections between the devices are made by the components of the device and links defined. Therefore, to connect two devices together, we need to define the connection in the following format:
@@ -361,10 +361,10 @@ Connections between the devices are made by the components of the device and lin
 ```
 <src_device>.<dev_index><src_component><comp_index>.<link>.<dst_device>.<dev_index><dst_component><comp_index>
 ```
+
 The `<src_device>.<dev_index><src_component><comp_index>` specifies the source device, its index, component, and the component's index. The same format applies to the destination. The link defines the connection between source and destination.
 
 A "." separator separates infrastructure elements. To connect a `host` with the `rack_switch`, define the connection as:
-
 
 <details open>
 <summary><strong>YAML Definition</strong></summary>
@@ -459,7 +459,7 @@ inventory:
     generic_switch:
       name: generic_switch
       components:
-        port-down:
+        port:
           name: port
           count: 4
           nic:
@@ -538,7 +538,7 @@ connections:
       "generic_switch": {
         "name": "generic_switch",
         "components": {
-          "port-down": {
+          "port": {
             "name": "port",
             "count": 4,
             "nic": {
@@ -602,13 +602,15 @@ connections:
 <br>
 
 ## Binding Logical Infrastructure with Custom Attributes
+
 The primary purpose of infra.proto is to define and design a generic network fabric. This enables end users to specify the devices as nodes and links as edges. The data model also allows for the definition and design of devices by adding links and components within the device, modeling the device internals as a subgraph.
 Another data model, annotate.proto, allows for the definition and binding of various vendor-specific parameters within the generic infrastructure. Users can bind:
+
 - Vendor-specific data
 - Additional qualities of the infrastructure
 - Specific device performance attributes, such as:
-  -	Latency
-  -	Routing tables
+  - Latency
+  - Routing tables
 
 This helps to add more context and content to infrastructure elements.
 
@@ -617,8 +619,6 @@ The main objective is to decouple various bindings from the infrastructure, sepa
 Lets annotate device type to our previous example:
 
 The proposal is to include a `Device Type` for our infrastructure devices, with the types being `physical_switch`, `physical_host`, `vm_host`, and `vm_switch`. This categorization would offer additional insights into the nature of the device. Annotating the infrastructure:
-
-
 
 <details open>
 <summary><strong>YAML Definition</strong></summary>
