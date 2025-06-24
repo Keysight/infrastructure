@@ -45,8 +45,8 @@
             "TIER_0": {
                 "name": "TIER_0",
                 "components": {
-                    "port-down": {
-                        "name": "port-down",
+                    "port": {
+                        "name": "port",
                         "count": 4,
                         "nic": {
                             "ethernet": {}
@@ -66,10 +66,10 @@
                     }
                 },
                 "connections": [
-                    "port-down.0.mii.asic.0",
-                    "port-down.1.mii.asic.0",
-                    "port-down.2.mii.asic.0",
-                    "port-down.3.mii.asic.0"
+                    "port.0.mii.asic.0",
+                    "port.1.mii.asic.0",
+                    "port.2.mii.asic.0",
+                    "port.3.mii.asic.0"
                 ]
             }
         },
@@ -96,9 +96,9 @@
         }
     },
     "connections": [
-        "generic.0.nic.0.100_gbps.tier_0.0.port-down.0",
-        "generic.1.nic.0.100_gbps.tier_0.0.port-down.1",
-        "generic.2.nic.0.100_gbps.tier_0.0.port-down.2",
-        "generic.3.nic.0.100_gbps.tier_0.0.port-down.3"
+        "generic.0.nic.0.100_gbps.tier_0.0.port.0",
+        "generic.1.nic.0.100_gbps.tier_0.0.port.1",
+        "generic.2.nic.0.100_gbps.tier_0.0.port.2",
+        "generic.3.nic.0.100_gbps.tier_0.0.port.3"
     ]
 }

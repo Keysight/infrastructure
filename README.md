@@ -1,4 +1,4 @@
-# Network Infrastructure as a Graph
+# Describing Cluster Infrastructure as a Graph
 
 Modern AI systems, comprising diverse scale-up and scale-out interconnect topologies that integrate complex heterogeneous components, connected together via diverse means, face a lack of standardized overall infrastructure description. This hinders benchmarking, simulation, and emulation. [infra.proto](keysight_chakra/infra/infra.proto) introduces a graph-based schema to describe AI/HPC infrastructure.
 
@@ -10,7 +10,7 @@ While Protobuf itself uses a compact binary format, protobuf data can be convert
 
 ## Table of Contents:
 
-- [Lets Build Infrastructure](#lets-build-infrastructure)
+- [Lets Describe a Cluster Using Infra Proto Data Model](#lets-describe-a-cluster-using-infra-proto-data-model)
   - [Creating Device Inventory](#building-infrastructure-creating-device-inventory)
   - [Designing a 4 port switch](#building-infrastructure-defining-a-4-port-switch)
   - [Designing a simple host](#building-infrastructure-design-host-with-a-single-nic)
@@ -20,7 +20,7 @@ While Protobuf itself uses a compact binary format, protobuf data can be convert
   - [Complete Example](#building-infrastructure-complete-example)
 - [Annotating Logical Infrastructure with Physical Attributes](#binding-logical-infrastructure-with-physical-attributes)
 
-## Lets Build Infrastructure
+## Lets Describe a Cluster Using Infra Proto Data Model
 
 The main steps in designing a network infrastructure using infra.proto is as follows:
 
