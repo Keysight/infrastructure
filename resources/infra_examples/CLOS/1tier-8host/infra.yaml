@@ -1,0 +1,79 @@
+inventory:
+  devices:
+    GENERIC_HOST:
+      name: GENERIC_HOST
+      components:
+        nic:
+          name: nic
+          count: 1
+          nic:
+            ethernet: {}
+        npu:
+          name: npu
+          count: 1
+          npu:
+            memory: MEM_UNSPECIFIED
+        npu_interconnect_switch:
+          name: npu_interconnect_switch
+          count: 1
+          switch:
+            custom: {}
+      connections:
+        - npu.0.pcie.nic.0
+        - npu.0.npu_interconnect.npu_interconnect_switch.0
+      links:
+        npu_interconnect:
+          name: npu_interconnect
+          bandwidth:
+            gbps: 1600
+        pcie:
+          name: pcie
+    TIER_0:
+      name: TIER_0
+      components:
+        asic:
+          name: asic
+          count: 1
+          cpu:
+            memory: MEM_RAM
+        port:
+          name: port
+          count: 8
+          nic:
+            ethernet: {}
+      connections:
+        - port.0.mii.asic.0
+        - port.1.mii.asic.0
+        - port.2.mii.asic.0
+        - port.3.mii.asic.0
+        - port.4.mii.asic.0
+        - port.5.mii.asic.0
+        - port.6.mii.asic.0
+        - port.7.mii.asic.0
+      links:
+        mii:
+          name: mii
+  links:
+    100_gbps:
+      name: 100_gbps
+      bandwidth:
+        gbps: 100
+      description: 100 Gbps ethernet link.
+device_instances:
+  generic:
+    name: generic
+    count: 8
+    device: GENERIC_HOST
+  tier_0:
+    name: tier_0
+    count: 1
+    device: TIER_0
+connections:
+  - generic.0.nic.0.100_gbps.tier_0.0.port.0
+  - generic.1.nic.0.100_gbps.tier_0.0.port.1
+  - generic.2.nic.0.100_gbps.tier_0.0.port.2
+  - generic.3.nic.0.100_gbps.tier_0.0.port.3
+  - generic.4.nic.0.100_gbps.tier_0.0.port.4
+  - generic.5.nic.0.100_gbps.tier_0.0.port.5
+  - generic.6.nic.0.100_gbps.tier_0.0.port.6
+  - generic.7.nic.0.100_gbps.tier_0.0.port.7

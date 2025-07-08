@@ -45,9 +45,9 @@
             "TIER_0": {
                 "name": "TIER_0",
                 "components": {
-                    "port-down": {
-                        "name": "port-down",
-                        "count": 4,
+                    "port": {
+                        "name": "port",
+                        "count": 8,
                         "nic": {
                             "ethernet": {}
                         }
@@ -66,10 +66,14 @@
                     }
                 },
                 "connections": [
-                    "port-down.0.mii.asic.0",
-                    "port-down.1.mii.asic.0",
-                    "port-down.2.mii.asic.0",
-                    "port-down.3.mii.asic.0"
+                    "port.0.mii.asic.0",
+                    "port.1.mii.asic.0",
+                    "port.2.mii.asic.0",
+                    "port.3.mii.asic.0",
+                    "port.4.mii.asic.0",
+                    "port.5.mii.asic.0",
+                    "port.6.mii.asic.0",
+                    "port.7.mii.asic.0"
                 ]
             }
         },
@@ -92,13 +96,17 @@
         "generic": {
             "name": "generic",
             "device": "GENERIC_HOST",
-            "count": 4
+            "count": 8
         }
     },
     "connections": [
-        "generic.0.nic.0.100_gbps.tier_0.0.port-down.0",
-        "generic.1.nic.0.100_gbps.tier_0.0.port-down.1",
-        "generic.2.nic.0.100_gbps.tier_0.0.port-down.2",
-        "generic.3.nic.0.100_gbps.tier_0.0.port-down.3"
+        "generic.0.nic.0.100_gbps.tier_0.0.port.0",
+        "generic.1.nic.0.100_gbps.tier_0.0.port.1",
+        "generic.2.nic.0.100_gbps.tier_0.0.port.2",
+        "generic.3.nic.0.100_gbps.tier_0.0.port.3",
+        "generic.4.nic.0.100_gbps.tier_0.0.port.4",
+        "generic.5.nic.0.100_gbps.tier_0.0.port.5",
+        "generic.6.nic.0.100_gbps.tier_0.0.port.6",
+        "generic.7.nic.0.100_gbps.tier_0.0.port.7"
     ]
 }
