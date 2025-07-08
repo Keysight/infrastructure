@@ -6,7 +6,7 @@ To create an infrastructure as a graph one can use messages from [infra.proto](k
 
 [infra.proto](keysight_chakra/infra/infra.proto) is a Protocol Buffers (Protobuf) message that serves as the core data model for defining and designing the infrastructure. Protobuf is a schema-based, strongly typed format that models data as messages with defined fields and types in a .proto file. This schema enables efficient serialization and deserialization of structured data.
 
-While Protobuf itself uses a compact binary format, protobuf data can be converted to human-readable formats like JSON and YAML for easier inspection, configuration, and integration with text-based tools. Our (wiki)[https://keysight.github.io/infrastructure.github.io/] uses YAML for its readability and suitability for configuration and data serialization tasks. YAML's clear syntax for nested structures and lists complements the Protobuf-defined data model.
+While Protobuf itself uses a compact binary format, protobuf data can be converted to human-readable formats like JSON and YAML for easier inspection, configuration, and integration with text-based tools. Our [wiki](https://keysight.github.io/infrastructure.github.io/) uses YAML for its readability and suitability for configuration and data serialization tasks. YAML's clear syntax for nested structures and lists complements the Protobuf-defined data model.
 
 For a comprehensive understanding of the infrastructure model and to gain insights into its capabilities please visit our [wiki](https://keysight.github.io/infrastructure.github.io/)
 
