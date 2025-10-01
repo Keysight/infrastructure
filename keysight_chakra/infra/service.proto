@@ -1,5 +1,7 @@
 // service.proto
 //
+// Copyright (C) Keysight Technologies, Inc
+//
 // Service and rpcs for infrastructure and annotations
 
 syntax = "proto3";
