@@ -30,7 +30,7 @@ build: ## compile all .proto files and generate artifacts
 		$(INFRA_PACKAGE_DIR)/annotate.proto \
 		$(INFRA_PACKAGE_DIR)/service.proto \
 		$(MLCOMMONS_PACKAGE_DIR)/et_def.proto 
-	python3 -m pip uninstall -y keysight-chakra
+	python3 -m pip uninstall -y keysight_chakra
 	python3 setup.py bdist_wheel
 	python3 -m pip install --no-cache .
 
