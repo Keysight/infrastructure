@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "keysight_chakra"
+requires-python = ">=3.8"
+description = "Fork of mlcommons/chakra with enhancements for Keysight"
+license = {text = "Apache-2.0"}
+authors = [
+        { name="Keysight Technologies", email="pdl-kai-dc-builder@keysight.com" },
+        { name="MLCommons", email="chakra@mlcommons.org"},
+    ]
+version = "1.2.1"
+readme = "README.md"
+dependencies = [
+    "protobuf",
+    "pyyaml",
+]
+
+[project.urls]
+Homepage = "https://github.com/Keysight/infrastructure"
