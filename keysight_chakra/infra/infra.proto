@@ -1,5 +1,7 @@
 // infra.proto
 //
+// Copyright (C) Keysight Technologies, Inc
+//
 // A data model for describing infrastructure as a graph.
 //
 // NOTES:

@@ -1,3 +1,10 @@
+// IMPORTANT! To comply with Apache 2.0 license we must document and changes
+// to this file. UPDATE THE CHANGE LOG BELOW when making changes
+// Changes:
+//    2025/1/30 Changed the package name from ChakraProtoMsg to keysight_chakra.mlcommons
+//    2025/10/1 Added this comment block to document changes
+//
+
 syntax = "proto3";
 
 package keysight_chakra.mlcommons;
@@ -154,10 +161,10 @@ message IOInfo {
 }
 
 message Tensor {
-    uint64 tensor_id = 1;  // An unique ID for the TensorImpl object.
-    uint64 storage_id = 2; // An unique ID for the underlying storage object.
-    uint64 offset = 3;     // Offset to the storage memory.
-    uint64 num_elem = 4;   // Number of elements in the storage.
-    uint64 elem_bytes = 5; // Number of bytes per element.
-    string device = 6;     // Tensor object device location.
+  uint64 tensor_id = 1;   // An unique ID for the TensorImpl object.
+  uint64 storage_id = 2;  // An unique ID for the underlying storage object.
+  uint64 offset = 3;      // Offset to the storage memory.
+  uint64 num_elem = 4;    // Number of elements in the storage.
+  uint64 elem_bytes = 5;  // Number of bytes per element.
+  string device = 6;      // Tensor object device location.
 }

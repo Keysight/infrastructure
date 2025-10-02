@@ -1,9 +1,11 @@
 // annotate.proto
 //
+// Copyright (C) Keysight Technologies, Inc
+//
 // A data model to annotate infrastructure paths with external
 // application information.
 //
-// Thesea are some examples of annotating infrastructure paths:
+// These are some examples of annotating infrastructure paths:
 //
 // annotation = Annotation(
 //     device_instance="pod_switch.0",
