@@ -11,7 +11,7 @@ authors = [
         { name="Keysight Technologies", email="pdl-kai-dc-builder@keysight.com" },
         { name="MLCommons", email="chakra@mlcommons.org"},
     ]
-version = "1.2.2"
+version = "1.2.3"
 readme = "README.md"
 dependencies = [
     "protobuf",
